@@ -389,6 +389,11 @@ class FreeformView(
 
     @RequiresApi(Build.VERSION_CODES.R)
     private fun initIMEMethod() {
+        // 仅在竖屏状态下启用输入法高度监听
+        if (!FreeformHelper.screenIsPortrait(screenRotation)) {
+            return
+        }
+        
         // 保存原始位置
         originalWindowY = windowLayoutParams.y
 
@@ -399,6 +404,11 @@ class FreeformView(
 
         // 设置 WindowInsets 监听器
         binding.root.setOnApplyWindowInsetsListener { v, insets ->
+            // 再次检查是否为竖屏状态，避免屏幕旋转后仍响应输入法
+            if (!FreeformHelper.screenIsPortrait(screenRotation)) {
+                return@setOnApplyWindowInsetsListener v.onApplyWindowInsets(insets)
+            }
+            
             val imeVisible = insets.isVisible(WindowInsets.Type.ime())
             val imeHeight = insets.getInsets(WindowInsets.Type.ime()).bottom
 
@@ -457,7 +467,10 @@ class FreeformView(
 
         resetScale()
 
-        initIMEMethod()
+        // 只在竖屏状态下初始化输入法监听
+        if (FreeformHelper.screenIsPortrait(screenRotation)) {
+            initIMEMethod()
+        }
 
         binding.freeformRoot.alpha = 1f
         binding.textureView.alpha = 0f
@@ -752,6 +765,22 @@ class FreeformView(
 
         refreshTouchScale()
         refreshActionScale()
+
+        // 屏幕方向变化时，根据是否为竖屏状态决定是否启用输入法监听
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (FreeformHelper.screenIsPortrait(screenRotation)) {
+                // 从横屏切换到竖屏，启用输入法监听
+                initIMEMethod()
+            } else {
+                // 从竖屏切换到横屏，重置输入法状态并移除监听
+                if (isKeyboardVisible) {
+                    isKeyboardVisible = false
+                    resetWindowPosition()
+                }
+                // 移除监听器
+                binding.root.setOnApplyWindowInsetsListener(null)
+            }
+        }
 
         if (isFloating && !isHidden) {
             moveFloatViewLocation(location, true)
