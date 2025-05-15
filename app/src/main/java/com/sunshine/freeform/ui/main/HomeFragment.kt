@@ -41,7 +41,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
         private const val TAG = "HomeFragment"
         private const val COMMON_QUESTION_ZH = "https://github.com/Live-block/Flyme-FreeForm/blob/master/qa_zh-Hans.md"
         private const val OPEN_API_ZH = "https://github.com/Live-block/Flyme-FreeForm/blob/master/open_api_zh-Hans.md"
-        private const val JOIN_GROUP = "https://t.me/MocuiChannel"
+        private const val JOIN_GROUP = "https://t.me/RePavilion"
     }
 
     override fun onCreateView(
