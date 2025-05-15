@@ -14,10 +14,18 @@ android {
         applicationId "com.sunshine.freeform"
         minSdk 27
         targetSdk 34
-        versionCode 3120
-        versionName "3.1.2"
+        versionCode 3200
+        versionName "3.2.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        signingConfigs {
+            release {
+                storeFile file("D:\\KeySign\\LiveSign.keystore")
+                storePassword "LiveSign"
+                keyAlias "MoCuiLive"
+                keyPassword "MoCuiSign"
+            }
 
     }
 
@@ -27,6 +35,8 @@ android {
             shrinkResources true
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+            }
         }
     }
     compileOptions {
