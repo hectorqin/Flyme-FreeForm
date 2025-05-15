@@ -387,12 +387,32 @@ class FreeformView(
         )
     }
 
+    /**
+     * 重置和清理输入法相关状态
+     * 用于确保输入法能够在下次正常显示
+     */
+    @RequiresApi(Build.VERSION_CODES.R)
+    private fun resetIMEState() {
+        // 重置输入法可见状态标志
+        isKeyboardVisible = false
+        
+        // 重置窗口位置，避免因输入法残留导致位置异常
+        if (::binding.isInitialized && binding.root.isAttachedToWindow) {
+            // 确保窗口已附加才进行重置
+            originalWindowY = windowLayoutParams.y
+            binding.root.setOnApplyWindowInsetsListener(null)
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.R)
     private fun initIMEMethod() {
         // 仅在竖屏状态下启用输入法高度监听
         if (!FreeformHelper.screenIsPortrait(screenRotation)) {
             return
         }
+        
+        // 先重置输入法状态，确保之前的状态不会影响当前操作
+        resetIMEState()
         
         // 保存原始位置
         originalWindowY = windowLayoutParams.y
@@ -468,8 +488,13 @@ class FreeformView(
         resetScale()
 
         // 只在竖屏状态下初始化输入法监听
-        if (FreeformHelper.screenIsPortrait(screenRotation)) {
-            initIMEMethod()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // 先确保任何可能的旧状态被重置
+            resetIMEState()
+            // 然后根据屏幕方向决定是否初始化输入法监听
+            if (FreeformHelper.screenIsPortrait(screenRotation)) {
+                initIMEMethod()
+            }
         }
 
         binding.freeformRoot.alpha = 1f
@@ -768,18 +793,14 @@ class FreeformView(
 
         // 屏幕方向变化时，根据是否为竖屏状态决定是否启用输入法监听
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // 先重置输入法状态，确保旧状态不会造成影响
+            resetIMEState()
+            
             if (FreeformHelper.screenIsPortrait(screenRotation)) {
                 // 从横屏切换到竖屏，启用输入法监听
                 initIMEMethod()
-            } else {
-                // 从竖屏切换到横屏，重置输入法状态并移除监听
-                if (isKeyboardVisible) {
-                    isKeyboardVisible = false
-                    resetWindowPosition()
-                }
-                // 移除监听器
-                binding.root.setOnApplyWindowInsetsListener(null)
             }
+            // 注意：不需要额外的else代码块，因为resetIMEState已经处理了输入法状态的重置
         }
 
         if (isFloating && !isHidden) {
@@ -1628,6 +1649,17 @@ class FreeformView(
     })
 
     override fun destroy() {
+        // 清理输入法状态
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // 如果输入法是可见的，先重置输入法状态
+            if (isKeyboardVisible) {
+                isKeyboardVisible = false
+                resetWindowPosition()
+            }
+            // 移除输入法监听器，避免监听器残留
+            binding.root.setOnApplyWindowInsetsListener(null)
+        }
+
         //记录位置
         if (viewModel.getBooleanSp("remember_freeform_position", false)) {
             val sp = context.getSharedPreferences(MiFreeform.APP_SETTINGS_NAME, Context.MODE_PRIVATE)
@@ -1655,6 +1687,16 @@ class FreeformView(
         isDestroy = true
         isHidden = false
         isFloating = false
+
+        // 清理虚拟显示
+        runCatching {
+            // 在释放surface前发送返回键，强制关闭可能的输入法
+            if (virtualDisplay.surface != null) {
+                performBackKey()
+                // 短暂延迟确保输入法有时间关闭
+                SystemClock.sleep(100)
+            }
+        }
 
         runCatching {
             windowManager.removeViewImmediate(binding.root)
