@@ -134,7 +134,7 @@ class FreeformView(
                         min(tmpWidth, tmpHeight)
         }
 
-    //小窗的“尺寸”，该尺寸只在小窗内屏幕方向改变时变化
+    //小窗的"尺寸"，该尺寸只在小窗内屏幕方向改变时变化
     private var freeformScreenHeight = 0
     private var freeformScreenWidth = 0
 
@@ -339,8 +339,19 @@ class FreeformView(
     }
 
     private fun initFloatViewSize() {
-        hangUpViewHeight = (rootHeight * config.floatViewSize).roundToInt()
-        hangUpViewWidth = (hangUpViewHeight * config.widthHeightRatio).roundToInt()
+        // 基于屏幕方向计算悬浮小窗大小
+        if (FreeformHelper.screenIsPortrait(screenRotation)) {
+            // 竖屏状态下，根据设定的比例计算高度和宽度
+            // 直接以屏幕宽度为基准计算正确宽高比的小窗
+            hangUpViewWidth = (realScreenWidth * config.floatViewSize).roundToInt()
+            hangUpViewHeight = (hangUpViewWidth / config.widthHeightRatio).roundToInt()
+        } else {
+            // 横屏状态保持原有逻辑
+            hangUpViewHeight = (rootHeight * config.floatViewSize).roundToInt()
+            hangUpViewWidth = (hangUpViewHeight * config.widthHeightRatio).roundToInt()
+        }
+
+        // 横屏内容特殊处理逻辑保持不变
         if (virtualDisplayRotation == VIRTUAL_DISPLAY_ROTATION_LANDSCAPE) {
             hangUpViewWidth = (realScreenHeight * config.floatViewSize).roundToInt()
             hangUpViewHeight = (hangUpViewWidth * config.widthHeightRatio).roundToInt()
@@ -819,7 +830,17 @@ class FreeformView(
     private fun refreshFreeformSize() {
         freeformHeight = if (FreeformHelper.screenIsPortrait(screenRotation)) (rootWidth / config.widthHeightRatio * config.freeformSize).roundToInt() else (rootWidth * config.freeformSizeLand).roundToInt()
         freeformHeight += cardHeightMargin.roundToInt()
-        freeformWidth = ((freeformHeight + cardWidthMargin) * config.widthHeightRatio).roundToInt()
+        
+        // 调整宽度计算方式，根据屏幕方向和虚拟显示方向进行不同的计算
+        if (FreeformHelper.screenIsPortrait(screenRotation)) {
+            // 竖屏状态，考虑到bottomBar是外部布局，不影响内容宽高比
+            // 直接基于正确的宽高比计算宽度
+            freeformWidth = (rootWidth * config.freeformSize).roundToInt()
+        } else {
+            // 横屏状态保持原有逻辑
+            freeformWidth = ((freeformHeight + cardWidthMargin) * config.widthHeightRatio).roundToInt()
+        }
+        
         if (virtualDisplayRotation == VIRTUAL_DISPLAY_ROTATION_LANDSCAPE) {
             if (freeformHeight > rootWidth) {
                 freeformWidth = (rootWidth - (rootWidth * 0.05)).roundToInt()
