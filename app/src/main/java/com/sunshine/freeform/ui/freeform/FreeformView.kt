@@ -11,6 +11,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.graphics.Color
+import android.graphics.Matrix
 import android.graphics.PixelFormat
 import android.graphics.SurfaceTexture
 import android.hardware.display.VirtualDisplay
@@ -25,6 +26,9 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.animation.addListener
+import com.github.kyuubiran.ezxhelper.utils.argTypes
+import com.github.kyuubiran.ezxhelper.utils.args
+import com.github.kyuubiran.ezxhelper.utils.invokeMethod
 import com.sunshine.freeform.R
 import com.sunshine.freeform.app.MiFreeform
 import com.sunshine.freeform.databinding.ViewFreeformFlymeBinding
@@ -1739,41 +1743,29 @@ class FreeformView(
          * 触控处理
          */
         private fun handleTouch(event: MotionEvent) {
-            val pointerCoords: Array<MotionEvent.PointerCoords?> = arrayOfNulls(event.pointerCount)
-            val pointerProperties: Array<MotionEvent.PointerProperties?> = arrayOfNulls(event.pointerCount)
-            for (i in 0 until event.pointerCount) {
-                val oldCoords = MotionEvent.PointerCoords()
-                val pointerProperty = MotionEvent.PointerProperties()
-                event.getPointerCoords(i, oldCoords)
-                event.getPointerProperties(i, pointerProperty)
-                pointerCoords[i] = oldCoords
-                pointerCoords[i]!!.apply {
-                    x = oldCoords.x / scaleX
-                    y = oldCoords.y / scaleY
-                }
-                pointerProperties[i] = pointerProperty
+            // 修复滑动惯性
+            val newEvent = MotionEvent.obtain(event)
+            if (newEvent == null) {
+                return
             }
 
-            val newEvent = MotionEvent.obtain(
-                event.downTime,
-                event.eventTime,
-                event.action,
-                event.pointerCount,
-                pointerProperties,
-                pointerCoords,
-                event.metaState,
-                event.buttonState,
-                event.xPrecision,
-                event.yPrecision,
-                event.deviceId,
-                event.edgeFlags,
-                event.source,
-                event.flags
-            )
+            // 修复y轴偏移问题
+            try {
+                val invertedScaleX = if (scaleX != 0f && !scaleX.isNaN() && !scaleX.isInfinite()) 1.0f / scaleX else 1.0f
+                val invertedScaleY = if (scaleY != 0f && !scaleY.isNaN() && !scaleY.isInfinite()) 1.0f / scaleY else 1.0f
 
-            setDisplayIdMethod?.invoke(newEvent, virtualDisplay.display.displayId)
-            inputManager.injectInputEvent(newEvent, 0)
-            newEvent.recycle()
+                if (invertedScaleX != 1.0f || invertedScaleY != 1.0f) {
+                    val matrix = Matrix()
+                    matrix.setScale(invertedScaleX, invertedScaleY)
+                    newEvent.transform(matrix)
+                }
+
+                // 使用EzXHelper库应用修复
+                newEvent.invokeMethod("setDisplayId", args(virtualDisplay.display.displayId), argTypes(Integer.TYPE))
+                inputManager.injectInputEvent(newEvent, 0)
+            } finally {
+                newEvent.recycle()
+            }
         }
     }
 
@@ -1796,39 +1788,29 @@ class FreeformView(
          * 触控处理
          */
         private fun handleTouch(event: MotionEvent) {
-            val pointerCoords: Array<MotionEvent.PointerCoords?> = arrayOfNulls(event.pointerCount)
-            val pointerProperties: Array<MotionEvent.PointerProperties?> = arrayOfNulls(event.pointerCount)
-            for (i in 0 until event.pointerCount) {
-                val oldCoords = MotionEvent.PointerCoords()
-                val pointerProperty = MotionEvent.PointerProperties()
-                event.getPointerCoords(i, oldCoords)
-                event.getPointerProperties(i, pointerProperty)
-                pointerCoords[i] = oldCoords
-                pointerCoords[i]!!.apply {
-                    x = oldCoords.x / scaleX
-                    y = oldCoords.y / scaleY
-                }
-                pointerProperties[i] = pointerProperty
+            // 修复滑动惯性
+            val newEvent = MotionEvent.obtain(event)
+            if (newEvent == null) {
+                return
             }
 
-            val newEvent = MotionEvent.obtain(
-                event.downTime,
-                event.eventTime,
-                event.action,
-                event.pointerCount,
-                pointerProperties,
-                pointerCoords,
-                event.metaState,
-                event.buttonState,
-                event.xPrecision,
-                event.yPrecision,
-                event.deviceId,
-                event.edgeFlags,
-                event.source,
-                event.flags
-            )
-            inputManager.injectInputEvent(newEvent, virtualDisplay.display.displayId)
-            newEvent.recycle()
+            // 修复y轴偏移问题
+            try {
+                val invertedScaleX = if (scaleX != 0f && !scaleX.isNaN() && !scaleX.isInfinite()) 1.0f / scaleX else 1.0f
+                val invertedScaleY = if (scaleY != 0f && !scaleY.isNaN() && !scaleY.isInfinite()) 1.0f / scaleY else 1.0f
+
+                if (invertedScaleX != 1.0f || invertedScaleY != 1.0f) {
+                    val matrix = Matrix()
+                    matrix.setScale(invertedScaleX, invertedScaleY)
+                    newEvent.transform(matrix)
+                }
+
+                // 使用EzXHelper库应用修复
+                newEvent.invokeMethod("setDisplayId", args(virtualDisplay.display.displayId), argTypes(Integer.TYPE))
+                inputManager.injectInputEvent(newEvent, 0)
+            } finally {
+                newEvent.recycle()
+            }
         }
     }
 
