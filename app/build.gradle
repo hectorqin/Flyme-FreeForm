@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.sunshine.freeform"
@@ -49,6 +49,8 @@ android {
     buildFeatures {
         viewBinding true
     }
+    namespace 'com.sunshine.freeform'
+    buildToolsVersion '35.0.0'
 }
 
 configurations.all {
