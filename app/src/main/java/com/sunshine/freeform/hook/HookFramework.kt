@@ -1,16 +1,14 @@
 package com.sunshine.freeform.hook
 
-import android.annotation.SuppressLint
-import android.content.Context
 import android.content.pm.ActivityInfo
-import android.hardware.display.DisplayManager
-import android.os.Binder
 import android.os.Build
-import android.util.Log
-import android.view.Display
-import android.view.InputEvent
 import com.sunshine.freeform.hook.utils.XLog
-import de.robv.android.xposed.*
+import de.robv.android.xposed.IXposedHookLoadPackage
+import de.robv.android.xposed.IXposedHookZygoteInit
+import de.robv.android.xposed.XC_MethodHook
+import de.robv.android.xposed.XC_MethodReplacement
+import de.robv.android.xposed.XposedBridge
+import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 
 class HookFramework : IXposedHookLoadPackage, IXposedHookZygoteInit {
@@ -19,7 +17,6 @@ class HookFramework : IXposedHookLoadPackage, IXposedHookZygoteInit {
      * 10
      */
     private fun hookASSOnQ(classLoader: ClassLoader) {
-        //val classLoader = Thread.currentThread().contextClassLoader
         val ass = XposedHelpers.findClass("com.android.server.wm.ActivityStackSupervisor", classLoader)
         val taskRecordClazz = XposedHelpers.findClass("com.android.server.wm.TaskRecord", classLoader)
         val activityStackClazz = XposedHelpers.findClass("com.android.server.wm.ActivityStack", classLoader)
@@ -48,7 +45,6 @@ class HookFramework : IXposedHookLoadPackage, IXposedHookZygoteInit {
     }
 
     private fun hookASSPreQ(classLoader: ClassLoader) {
-        //val classLoader = Thread.currentThread().contextClassLoader
         val ass = XposedHelpers.findClass("com.android.server.am.ActivityStackSupervisor", classLoader)
         XposedHelpers.findAndHookMethod(
             ass,
@@ -70,7 +66,6 @@ class HookFramework : IXposedHookLoadPackage, IXposedHookZygoteInit {
      * 10 11
      */
     private fun hookASS(classLoader: ClassLoader) {
-        //val classLoader = Thread.currentThread().contextClassLoader
         val ass = XposedHelpers.findClass("com.android.server.wm.ActivityStackSupervisor", classLoader)
         XposedHelpers.findAndHookMethod(
             ass,
@@ -92,7 +87,6 @@ class HookFramework : IXposedHookLoadPackage, IXposedHookZygoteInit {
      * 12 别找了，logcat突然没有这个报错了，可能要换hook点了，明明前几天还有
      */
     private fun hookATS(classLoader: ClassLoader) {
-        //val classLoader = Thread.currentThread().contextClassLoader
         val ats = XposedHelpers.findClass("com.android.server.wm.ActivityTaskSupervisor", classLoader)
         XposedHelpers.findAndHookMethod(
             ats,
@@ -114,7 +108,6 @@ class HookFramework : IXposedHookLoadPackage, IXposedHookZygoteInit {
      * 13
      */
     private fun hookATSOnT(classLoader: ClassLoader) {
-        //val classLoader = Thread.currentThread().contextClassLoader
         val ats = XposedHelpers.findClass("com.android.server.wm.ActivityTaskSupervisor", classLoader)
         val taskClazz = XposedHelpers.findClass("com.android.server.wm.Task", classLoader)
         val taskDisplayAreaClazz = XposedHelpers.findClass("com.android.server.wm.TaskDisplayArea", classLoader)
@@ -169,7 +162,6 @@ class HookFramework : IXposedHookLoadPackage, IXposedHookZygoteInit {
         val ats = XposedHelpers.findClass("com.android.server.wm.ActivityTaskSupervisor", classLoader)
         val taskClazz = XposedHelpers.findClass("com.android.server.wm.Task", classLoader)
         val taskDisplayAreaClazz = XposedHelpers.findClass("com.android.server.wm.TaskDisplayArea", classLoader)
-        //val activityStackClazz = XposedHelpers.findClass("com.android.server.wm.ActivityStack", classLoader)
         XposedHelpers.findAndHookMethod(
             ats,
             "handleNonResizableTaskIfNeeded",
@@ -212,82 +204,6 @@ class HookFramework : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 }
             }
         )
-
-        /*XposedBridge.hookAllMethods(
-            ims,
-            "createInputForwarder",
-            object : XC_MethodHook() {
-                @SuppressLint("SoonBlockedPrivateApi")
-                override fun beforeHookedMethod(param: MethodHookParam) {
-                    val mContext = XposedHelpers.getObjectField(param.thisObject, "mContext") as Context
-                    val displayManager = mContext.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
-                    val display = displayManager.getDisplay(param.args[0] as Int)
-                    val ownerUidField = Display::class.java.getDeclaredField("mOwnerUid")
-                    ownerUidField.isAccessible = true
-                    ownerUidField.set(display, Binder.getCallingUid())
-                }
-            }
-        )
-
-        XposedBridge.hookAllMethods(
-            ims,
-            "injectInputEventInternal",
-            object : XC_MethodReplacement() {
-                override fun replaceHookedMethod(param: MethodHookParam): Any {
-                    val mPtr = XposedHelpers.getLongField(param.thisObject, "mPtr")
-
-                    val event = param.args[0] as InputEvent?
-                    val displayId = param.args[1] as Int
-                    val mode = param.args[2] as Int
-                    if (event == null) {
-                        throw IllegalArgumentException("event must not be null")
-                    }
-                    if (mode != INJECT_INPUT_EVENT_MODE_ASYNC &&
-                        mode != INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH &&
-                        mode != INJECT_INPUT_EVENT_MODE_WAIT_FOR_RESULT
-                    ) {
-                        throw IllegalArgumentException("mode is invalid")
-                    }
-                    val pid = Binder.getCallingPid()
-                    val uid = 0
-                    val ident = Binder.clearCallingIdentity()
-                    var result: Int = -1
-                    try {
-                        result = XposedHelpers.callMethod(
-                            param.thisObject,
-                            "nativeInjectInputEvent",
-                            mPtr,
-                            event,
-                            displayId,
-                            pid,
-                            uid,
-                            mode,
-                            INJECTION_TIMEOUT_MILLIS,
-                            FLAG_DISABLE_KEY_REPEAT
-                        ) as Int
-                    } finally {
-                        Binder.restoreCallingIdentity(ident)
-                    }
-                    when(result) {
-                        INPUT_EVENT_INJECTION_PERMISSION_DENIED -> {
-                            XLog.d("Input event injection from pid $pid permission denied.")
-                            throw SecurityException("Injecting to another application requires INJECT_EVENTS permission")
-                        }
-                        INPUT_EVENT_INJECTION_SUCCEEDED -> {
-                            return true
-                        }
-                        INPUT_EVENT_INJECTION_TIMED_OUT -> {
-                            XLog.d("Input event injection from pid $pid timed out.")
-                            return false
-                        }
-                        else -> {
-                            XLog.d("Input event injection from pid $pid failed.")
-                            return false
-                        }
-                    }
-                }
-            }
-        )*/
     }
 
     override fun handleLoadPackage(p0: XC_LoadPackage.LoadPackageParam) {
@@ -295,8 +211,8 @@ class HookFramework : IXposedHookLoadPackage, IXposedHookZygoteInit {
             val classLoader = p0.classLoader
 
             when (Build.VERSION.SDK_INT) {
-                Build.VERSION_CODES.S, Build.VERSION_CODES.S_V2, 33 -> {
-                    XLog.d("hook on Android 12 12L 13")
+                Build.VERSION_CODES.S, Build.VERSION_CODES.S_V2, Build.VERSION_CODES.TIRAMISU, Build.VERSION_CODES.UPSIDE_DOWN_CAKE, Build.VERSION_CODES.VANILLA_ICE_CREAM -> {
+                    XLog.d("hook on Android 12 and so on")
                     hookATS(classLoader)
                 }
                 Build.VERSION_CODES.R -> {
