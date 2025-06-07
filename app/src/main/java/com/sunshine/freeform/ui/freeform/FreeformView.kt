@@ -20,26 +20,25 @@ import android.net.Uri
 import android.os.Build
 import android.os.SystemClock
 import android.provider.Settings
-import android.util.DisplayMetrics
 import android.view.*
 import android.view.animation.*
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.animation.addListener
+import androidx.core.view.WindowInsetsCompat
 import com.github.kyuubiran.ezxhelper.utils.argTypes
 import com.github.kyuubiran.ezxhelper.utils.args
 import com.github.kyuubiran.ezxhelper.utils.invokeMethod
 import com.sunshine.freeform.R
 import com.sunshine.freeform.app.MiFreeform
 import com.sunshine.freeform.databinding.ViewFreeformFlymeBinding
-import com.sunshine.freeform.utils.ServiceUtils.windowManager
-import com.sunshine.freeform.utils.ServiceUtils.displayManager
+import com.sunshine.freeform.databinding.ViewFloatingButtonBinding
 import com.sunshine.freeform.utils.ServiceUtils.activityTaskManager
-import com.sunshine.freeform.utils.ServiceUtils.inputManager
+import com.sunshine.freeform.utils.ServiceUtils.displayManager
 import com.sunshine.freeform.utils.ServiceUtils.iWindowManager
-import kotlinx.android.synthetic.main.view_floating_button.view.*
-import kotlinx.android.synthetic.main.view_freeform.view.root
+import com.sunshine.freeform.utils.ServiceUtils.inputManager
+import com.sunshine.freeform.utils.ServiceUtils.windowManager
 import kotlinx.coroutines.*
 import java.lang.reflect.Field
 import java.lang.reflect.Method
@@ -74,7 +73,7 @@ class FreeformView(
     var isHidden = false
 
     //小窗中应用的taskId
-    private var taskId = -1
+    private var taskList = ArrayList<Int>()
 
     // 输入法高度检测相关变量
     private var isKeyboardVisible = false
@@ -392,67 +391,36 @@ class FreeformView(
         )
     }
 
-    /**
-     * 重置和清理输入法相关状态
-     * 用于确保输入法能够在下次正常显示
-     */
-    @RequiresApi(Build.VERSION_CODES.R)
-    private fun resetIMEState() {
-        // 重置输入法可见状态标志
-        isKeyboardVisible = false
-        
-        // 重置窗口位置，避免因输入法残留导致位置异常
-        if (::binding.isInitialized && binding.root.isAttachedToWindow) {
-            // 确保窗口已附加才进行重置
-            originalWindowY = windowLayoutParams.y
-            binding.root.setOnApplyWindowInsetsListener(null)
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.R)
-    private fun initIMEMethod() {
-        // 仅在竖屏状态下启用输入法高度监听
-        if (!FreeformHelper.screenIsPortrait(screenRotation)) {
-            return
-        }
-        
-        // 先重置输入法状态，确保之前的状态不会影响当前操作
-        resetIMEState()
-        
-        // 保存原始位置
-        originalWindowY = windowLayoutParams.y
-
-        // 获取屏幕高度
-        val metrics = DisplayMetrics()
-        windowManager.defaultDisplay.getMetrics(metrics)
-        screenHeight = metrics.heightPixels
-
-        // 设置 WindowInsets 监听器
-        binding.root.setOnApplyWindowInsetsListener { v, insets ->
-            // 再次检查是否为竖屏状态，避免屏幕旋转后仍响应输入法
-            if (!FreeformHelper.screenIsPortrait(screenRotation)) {
-                return@setOnApplyWindowInsetsListener v.onApplyWindowInsets(insets)
-            }
-            
-            val imeVisible = insets.isVisible(WindowInsets.Type.ime())
-            val imeHeight = insets.getInsets(WindowInsets.Type.ime()).bottom
-
-            if (imeVisible != isKeyboardVisible) {
-                isKeyboardVisible = imeVisible
-                if (isKeyboardVisible) {
-                    elevateWindow(imeHeight)
-                } else {
-                    resetWindowPosition()
-                }
-            }
-            v.onApplyWindowInsets(insets) // 确保继续传递 insets
-        }
-    }
-
     @RequiresApi(Build.VERSION_CODES.R)
     @SuppressLint("ClickableViewAccessibility")
     fun initView() {
         binding = ViewFreeformFlymeBinding.bind(LayoutInflater.from(context).inflate(R.layout.view_freeform_flyme, null, false))
+
+        // 添加输入法监听
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            binding.root.setOnApplyWindowInsetsListener { view, windowInsets ->
+                val imeHeight = windowInsets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+                val isImeVisible = imeHeight > 0
+                
+                if (isImeVisible != isKeyboardVisible) {
+                    isKeyboardVisible = isImeVisible
+                    if (isImeVisible) {
+                        // 保存原始位置
+                        originalWindowY = windowLayoutParams.y
+                        // 只在非迷你状态且非横屏时调整位置
+                        if (!isFloating && FreeformHelper.screenIsPortrait(screenRotation)) {
+                            elevateWindow(imeHeight)
+                        }
+                    } else {
+                        // 恢复原始位置
+                        if (!isFloating && FreeformHelper.screenIsPortrait(screenRotation)) {
+                            resetWindowPosition()
+                        }
+                    }
+                }
+                windowInsets
+            }
+        }
 
         backgroundView = View(context)
         backgroundView.setBackgroundColor(Color.TRANSPARENT)
@@ -491,16 +459,6 @@ class FreeformView(
         initFloatBar()
 
         resetScale()
-
-        // 只在竖屏状态下初始化输入法监听
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // 先确保任何可能的旧状态被重置
-            resetIMEState()
-            // 然后根据屏幕方向决定是否初始化输入法监听
-            if (FreeformHelper.screenIsPortrait(screenRotation)) {
-                initIMEMethod()
-            }
-        }
 
         binding.freeformRoot.alpha = 1f
         binding.textureView.alpha = 0f
@@ -762,6 +720,8 @@ class FreeformView(
     }
 
     private fun onFreeFormRotationChanged() {
+        if (isDestroy) return
+
         val tempHeight = max(freeformScreenHeight, freeformScreenWidth)
         val tempWidth = min(freeformScreenHeight, freeformScreenWidth)
 
@@ -795,18 +755,6 @@ class FreeformView(
 
         refreshTouchScale()
         refreshActionScale()
-
-        // 屏幕方向变化时，根据是否为竖屏状态决定是否启用输入法监听
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // 先重置输入法状态，确保旧状态不会造成影响
-            resetIMEState()
-            
-            if (FreeformHelper.screenIsPortrait(screenRotation)) {
-                // 从横屏切换到竖屏，启用输入法监听
-                initIMEMethod()
-            }
-            // 注意：不需要额外的else代码块，因为resetIMEState已经处理了输入法状态的重置
-        }
 
         if (isFloating && !isHidden) {
             moveFloatViewLocation(location, true)
@@ -883,16 +831,15 @@ class FreeformView(
     }
 
     private fun refreshFreeformSize() {
-        freeformHeight = if (FreeformHelper.screenIsPortrait(screenRotation)) (rootWidth / config.widthHeightRatio * config.freeformSize).roundToInt() else (rootWidth * config.freeformSizeLand).roundToInt()
-        freeformHeight += cardHeightMargin.roundToInt()
-        
-        // 调整宽度计算方式，根据屏幕方向和虚拟显示方向进行不同的计算
         if (FreeformHelper.screenIsPortrait(screenRotation)) {
-            // 竖屏状态，考虑到bottomBar是外部布局，不影响内容宽高比
-            // 直接基于正确的宽高比计算宽度
+            // 竖屏状态，以宽度为基准计算，确保宽高比正确
             freeformWidth = (rootWidth * config.freeformSize).roundToInt()
+            val contentHeight = (freeformWidth - cardWidthMargin) / config.widthHeightRatio
+            freeformHeight = (contentHeight + cardHeightMargin).roundToInt()
         } else {
             // 横屏状态保持原有逻辑
+            freeformHeight = (rootWidth * config.freeformSizeLand).roundToInt()
+            freeformHeight += cardHeightMargin.roundToInt()
             freeformWidth = ((freeformHeight + cardWidthMargin) * config.widthHeightRatio).roundToInt()
         }
         
@@ -1107,10 +1054,10 @@ class FreeformView(
             val tempHeight = freeformHeight + dy
             if (tempHeight >= hangUpViewHeight && tempHeight <= rootHeight * 0.9) {
                 freeformHeight += dy.roundToInt()
-                freeformWidth = (freeformHeight * config.widthHeightRatio).roundToInt()
-                if (virtualDisplayRotation == VIRTUAL_DISPLAY_ROTATION_LANDSCAPE) {
-                    freeformWidth = ((freeformHeight - (cardHeightMargin * config.widthHeightRatio)) / config.widthHeightRatio).roundToInt()
-                }
+
+                val contentHeight = freeformHeight - cardHeightMargin
+                val contentWidth = contentHeight * config.widthHeightRatio
+                freeformWidth = (contentWidth + cardWidthMargin).roundToInt()
 
                 mScaleX = freeformWidth / rootWidth.toFloat()
                 mScaleY = freeformHeight / rootHeight.toFloat()
@@ -1121,10 +1068,10 @@ class FreeformView(
             val tempWidth = freeformWidth + dx
             if (tempWidth >= hangUpViewWidth && tempWidth <= rootWidth * 0.9) {
                 freeformWidth += dx.roundToInt()
-                freeformHeight = ((freeformWidth / config.widthHeightRatio) - cardWidthMargin).roundToInt()
-                if (virtualDisplayRotation == VIRTUAL_DISPLAY_ROTATION_LANDSCAPE) {
-                    freeformHeight = ((freeformWidth + cardHeightMargin) * config.widthHeightRatio).roundToInt()
-                }
+
+                val contentWidth = freeformWidth - cardWidthMargin
+                val contentHeight = contentWidth / config.widthHeightRatio
+                freeformHeight = (contentHeight + cardHeightMargin).roundToInt()
 
                 mScaleX = freeformWidth / rootWidth.toFloat()
                 mScaleY = freeformHeight / rootHeight.toFloat()
@@ -1182,7 +1129,7 @@ class FreeformView(
                                         },
                                 )
                                 startDelay = 125
-                                duration = 600
+                                duration = 550
                                 interpolator = OvershootInterpolator(1.5f)
                                 addListener(
                                     onStart = {
@@ -1295,6 +1242,9 @@ class FreeformView(
         }
     }
 
+    private lateinit var hiddenView: View
+    private lateinit var hiddenViewBinding: ViewFloatingButtonBinding
+
     private fun moveHiddenViewLocation(location: IntArray) {
         val layoutParams = hiddenView.layoutParams as WindowManager.LayoutParams
         val windowCoordinate = intArrayOf(
@@ -1354,8 +1304,6 @@ class FreeformView(
         }
     }
 
-    private lateinit var hiddenView: View
-
     private inner class FloatViewTouchListener : View.OnTouchListener {
         var moveStartX : Float = -1f
         var moveStartY : Float = -1f
@@ -1382,17 +1330,17 @@ class FreeformView(
                     movedX = event.rawX - moveStartX
                     movedY = event.rawY - moveStartY
                     if (Math.abs(movedX) > minlong || Math.abs(movedY) > minlong) {
-                    isMoved = true
+                        isMoved = true
 
-                    windowManager.updateViewLayout(binding.root, windowLayoutParams.apply {
-                        x += movedX.toInt()
-                        y += movedY.toInt()
-                    })
+                        windowManager.updateViewLayout(binding.root, windowLayoutParams.apply {
+                            x += movedX.toInt()
+                            y += movedY.toInt()
+                        })
 
-                    moveStartX = event.rawX
-                    moveStartY = event.rawY
+                        moveStartX = event.rawX
+                        moveStartY = event.rawY
+                    }
                 }
-            }
                 MotionEvent.ACTION_UP -> {
                     if (isMoved) {
                         val nowX = event.rawX
@@ -1445,17 +1393,17 @@ class FreeformView(
                                 onStart = {
                                     if (position != 0) {
                                         isHidden = true
-                                        hiddenView = LayoutInflater.from(context).inflate(R.layout.view_floating_button, null, false)
-                                        hiddenView.root.apply {
-                                            setOnTouchListener(this@FloatViewTouchListener)
-                                        }
+                                        val inflater = LayoutInflater.from(context)
+                                        hiddenViewBinding = ViewFloatingButtonBinding.inflate(inflater)
+                                        hiddenView = hiddenViewBinding.root
+                                        hiddenViewBinding.root.setOnTouchListener(this@FloatViewTouchListener)
                                         if (position == 1)
-                                            hiddenView.backgroundView.background = context.getDrawable(R.drawable.floating_button_bg_right)
+                                            hiddenViewBinding.backgroundView.background = context.getDrawable(R.drawable.floating_button_bg_right)
 
                                         val floatingButtonWidth = context.resources.getDimension(R.dimen.floating_button_width).toInt()
                                         val floatingButtonHeight = context.resources.getDimension(R.dimen.floating_button_height).toInt()
 
-                                        windowManager.addView(hiddenView,  WindowManager.LayoutParams().apply {
+                                        windowManager.addView(hiddenView, WindowManager.LayoutParams().apply {
                                             x = (realScreenWidth - floatingButtonWidth) / 2 * position
                                             y = location[1]
                                             width = floatingButtonWidth
@@ -1554,7 +1502,7 @@ class FreeformView(
                         cardWidthMargin.roundToInt()
                     )
                 )
-                duration = 600
+                duration = 550
                 interpolator = OvershootInterpolator(1.5f)
                 startDelay = 125
             }
@@ -1643,7 +1591,7 @@ class FreeformView(
                                     cardWidthMargin.roundToInt(),
                                 ),
                             )
-                            duration = 600
+                            duration = 550
                             startDelay = 125
                             interpolator = OvershootInterpolator(1.5f)
                             start()
@@ -1688,7 +1636,7 @@ class FreeformView(
             )
             addListener(
                 onStart = {
-                    hiddenView.root.setOnTouchListener(null)
+                    hiddenViewBinding.root.setOnTouchListener(null)
                     windowManager.removeView(hiddenView)
                     isHidden = false
                 },
@@ -1884,12 +1832,16 @@ class FreeformView(
         override fun onTaskCreated(tId: Int, componentName: ComponentName?) {
             if (config.intent !is Intent) return
             if (componentName?.packageName == config.componentName?.packageName) {
-                taskId = tId
+                taskList.add(tId)
             }
         }
 
+        override fun onTaskRemoved(taskId: Int) {
+            taskList.remove(taskId)
+        }
+
         override fun onTaskRemovalStarted(taskInfo: ActivityManager.RunningTaskInfo) {
-            if (taskInfo.taskId == taskId) {
+            if (taskList.contains(taskInfo.taskId)) {
                 scope.launch(Dispatchers.Main) {
                     destroy()
                 }
@@ -1897,28 +1849,19 @@ class FreeformView(
         }
 
         override fun onTaskDisplayChanged(tId: Int, newDisplayId: Int) {
-            if (tId == taskId && isFloating && newDisplayId == Display.DEFAULT_DISPLAY) {
+            if (taskList.contains(tId) && isFloating && newDisplayId == Display.DEFAULT_DISPLAY) {
                 context.startService(Intent(context, FreeformService::class.java).setAction(FreeformService.ACTION_START_INTENT).putExtra(Intent.EXTRA_INTENT, config.intent))
                 return
             }
-            if (taskId == -1 && newDisplayId == virtualDisplay.display.displayId) taskId = tId
+            if (taskList.contains(tId) && newDisplayId == virtualDisplay.display.displayId) taskList.contains(tId)
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                if (!isDestroy && tId == taskId && newDisplayId == Display.DEFAULT_DISPLAY) {
+                if (!isDestroy && taskList.contains(tId) && newDisplayId == Display.DEFAULT_DISPLAY) {
                     if (config.useSuiRefuseToFullScreen)
                         activityTaskManager.moveRootTaskToDisplay(tId, virtualDisplay.display.displayId)
                     else
                         // try relaunch
                         context.startService(Intent(context, FreeformService::class.java).setAction(FreeformService.ACTION_CALL_INTENT))
-                }
-            }
-        }
-
-        override fun onTaskMovedToFront(taskInfo: ActivityManager.RunningTaskInfo) {
-            runCatching {
-                val userId = taskInfo::class.java.getField("userId").get(taskInfo)
-                if (taskInfo.baseActivity!!.packageName == config.componentName!!.packageName && userId == config.userId) {
-                    taskId = taskInfo.taskId
                 }
             }
         }
@@ -1940,7 +1883,7 @@ class FreeformView(
                 ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE -> VIRTUAL_DISPLAY_ROTATION_LANDSCAPE
                 else -> VIRTUAL_DISPLAY_ROTATION_PORTRAIT
             }
-            if (taskId == tId && tempRotation != virtualDisplayRotation) {
+            if (taskList.contains(tId) && tempRotation != virtualDisplayRotation) {
                 virtualDisplayRotation = tempRotation
                 scope.launch(Dispatchers.Main) {
                     onFreeFormRotationChanged()

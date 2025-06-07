@@ -27,6 +27,12 @@ interface ITaskStackListener {
     */
     void onTaskCreated(int taskId, in ComponentName componentName);
 
+
+     /* Called when a task is removed.
+     *
+     * @param taskId id of the task.
+    */
+    void onTaskRemoved(int taskId);
     /**
      * Called when the task is about to be finished but before its surfaces are
      * removed from the window manager. This allows interested parties to
