@@ -20,7 +20,6 @@ import com.sunshine.freeform.R
 import com.sunshine.freeform.app.MiFreeform
 import com.sunshine.freeform.service.ForegroundService
 import com.sunshine.freeform.service.KeepAliveService
-import com.sunshine.freeform.ui.choose_apps.ChooseAppsActivity
 import com.sunshine.freeform.ui.freeform.FreeformView
 import com.sunshine.freeform.ui.permission.PermissionActivity
 import com.sunshine.freeform.ui.view.IntegerSimpleMenuPreference
@@ -50,11 +49,8 @@ class SettingFragment : PreferenceFragmentCompat(), Preference.OnPreferenceClick
             }
         }
 
-        findPreference<Preference>(QUICK_FLOATING_APP)!!.onPreferenceClickListener = this
-        findPreference<Preference>(NOTIFICATION_FREEFORM_APPS)!!.onPreferenceClickListener = this
         findPreference<Preference>(RESET_OVERLAY_SETTING)!!.onPreferenceClickListener = this
         findPreference<SwitchPreference>(SHOW_FLOATING)!!.onPreferenceChangeListener = this
-        findPreference<SwitchPreference>(NOTIFY_FREEFORM)!!.onPreferenceChangeListener = this
         findPreference<IntegerSimpleMenuPreference>(SERVICE_TYPE)!!.onPreferenceChangeListener = this
         findPreference<SeekBarPreference>(FREEFORM_SCALE)!!.apply {
             onPreferenceClickListener = this@SettingFragment
@@ -67,12 +63,6 @@ class SettingFragment : PreferenceFragmentCompat(), Preference.OnPreferenceClick
 
     override fun onPreferenceClick(preference: Preference): Boolean {
         when(preference.key) {
-            QUICK_FLOATING_APP -> {
-                requireActivity().startActivity(Intent(requireActivity(), ChooseAppsActivity::class.java).putExtra("type", 1))
-            }
-            NOTIFICATION_FREEFORM_APPS -> {
-                requireActivity().startActivity(Intent(requireActivity(), ChooseAppsActivity::class.java).putExtra("type", 2))
-            }
             RESET_OVERLAY_SETTING -> {
                 sp.edit().apply {
                     val screenWidth = min(requireContext().resources.displayMetrics.heightPixels, requireContext().resources.displayMetrics.widthPixels)
@@ -195,8 +185,6 @@ class SettingFragment : PreferenceFragmentCompat(), Preference.OnPreferenceClick
     }
 
     companion object {
-        private const val QUICK_FLOATING_APP = "quick_floating_app"
-        private const val NOTIFICATION_FREEFORM_APPS = "notification_freeform_apps"
         private const val SHOW_FLOATING = "show_floating"
         private const val NOTIFY_FREEFORM = "notify_freeform"
         private const val RESET_OVERLAY_SETTING = "reset_overlay_setting"

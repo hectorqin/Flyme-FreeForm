@@ -11,6 +11,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.sunshine.freeform.R
 import com.sunshine.freeform.databinding.ActivityMainBinding
+import com.sunshine.freeform.ui.choose_apps.ChooseAppsFragment
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -30,12 +31,13 @@ class MainActivity : AppCompatActivity() {
         binding.viewPager.apply {
             adapter = object : FragmentStateAdapter(this@MainActivity) {
                 override fun getItemCount(): Int {
-                    return 2
+                    return 3
                 }
 
                 override fun createFragment(position: Int): Fragment {
                     return when(position) {
                         0 -> HomeFragment()
+                        1 -> ChooseAppsFragment()
                         else -> SettingFragment()
                     }
                 }
@@ -55,8 +57,11 @@ class MainActivity : AppCompatActivity() {
                     R.id.navigation_home -> {
                         binding.viewPager.currentItem = 0
                     }
-                    else -> {
+                    R.id.navigation_apps -> {
                         binding.viewPager.currentItem = 1
+                    }
+                    else ->  {
+                        binding.viewPager.currentItem = 2
                     }
                 }
                 true

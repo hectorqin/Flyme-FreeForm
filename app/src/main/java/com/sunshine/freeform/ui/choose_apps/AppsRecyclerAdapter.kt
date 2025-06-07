@@ -62,7 +62,7 @@ class AppsRecyclerAdapter<T>(
             .into(holder.icon)
         holder.name.text = if (userId == 0) filterAllAppsList[position].label else "${filterAllAppsList[position].label}-分身${userId}"
         holder.packageName.text = filterAllAppsList[position].applicationInfo.packageName
-        if (type == ChooseAppsActivity.TYPE_FLOATING) {
+        if (type == ChooseAppsFragment.TYPE_FLOATING) {
             holder.switch.isChecked = contains(FreeFormAppsEntity(-1, filterAllAppsList[position].applicationInfo.packageName, userId))
         } else {
             holder.switch.isChecked = contains(NotificationAppsEntity(filterAllAppsList[position].applicationInfo.packageName, UserHandle.getUserId(filterAllAppsList[position].user, filterAllAppsList[position].applicationInfo.uid)))
@@ -93,7 +93,7 @@ class AppsRecyclerAdapter<T>(
         val packageName = filterAllAppsList[position].applicationInfo.packageName
         viewModel.insertApps(packageName, UserHandle.getUserId(filterAllAppsList[position].user, filterAllAppsList[position].applicationInfo.uid))
 
-        if (type == ChooseAppsActivity.TYPE_FLOATING) {
+        if (type == ChooseAppsFragment.TYPE_FLOATING) {
             appsList.add(FreeFormAppsEntity(-1, filterAllAppsList[position].applicationInfo.packageName, UserHandle.getUserId(filterAllAppsList[position].user, filterAllAppsList[position].applicationInfo.uid)) as T)
         } else {
             appsList.add(NotificationAppsEntity(filterAllAppsList[position].applicationInfo.packageName, UserHandle.getUserId(filterAllAppsList[position].user, filterAllAppsList[position].applicationInfo.uid)) as T)
@@ -105,7 +105,7 @@ class AppsRecyclerAdapter<T>(
         val packageName = filterAllAppsList[position].applicationInfo.packageName
         viewModel.deleteApps(packageName, UserHandle.getUserId(filterAllAppsList[position].user, filterAllAppsList[position].applicationInfo.uid))
 
-        if (type == ChooseAppsActivity.TYPE_FLOATING) {
+        if (type == ChooseAppsFragment.TYPE_FLOATING) {
             remove(FreeFormAppsEntity(-1, filterAllAppsList[position].applicationInfo.packageName, UserHandle.getUserId(filterAllAppsList[position].user, filterAllAppsList[position].applicationInfo.uid)))
         } else {
             remove(NotificationAppsEntity(filterAllAppsList[position].applicationInfo.packageName, UserHandle.getUserId(filterAllAppsList[position].user, filterAllAppsList[position].applicationInfo.uid)))

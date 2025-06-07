@@ -56,7 +56,7 @@
             android:name=".ui.main.MainActivity"
             android:exported="false" />
         <activity android:name=".ui.floating_apps_sort.FloatingAppsSortActivity" />
-        <activity android:name=".ui.choose_apps.ChooseAppsActivity" />
+        <activity android:name=".ui.choose_apps.ChooseAppsFragment" />
         <activity
             android:name=".ui.guide.GuideActivity"
             android:exported="false" />

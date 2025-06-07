@@ -21,7 +21,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.sunshine.freeform.R
 import com.sunshine.freeform.ui.floating_apps_sort.FloatingAppsSortActivity
-import com.sunshine.freeform.ui.choose_apps.ChooseAppsActivity
+import com.sunshine.freeform.ui.choose_apps.ChooseAppsFragment
 import com.sunshine.freeform.room.FreeFormAppsEntity
 import com.sunshine.freeform.ui.freeform.*
 import java.lang.reflect.Method
@@ -86,7 +86,7 @@ class ChooseAppFloatingAdapter(
                 holder.icon.setImageResource(R.drawable.ic_add)
                 holder.appName.text = context.getString(R.string.edit_apps)
                 holder.click.setOnClickListener {
-                    context.startActivity(Intent(context, ChooseAppsActivity::class.java).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) })
+                    context.startActivity(Intent(context, ChooseAppsFragment::class.java).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) })
                     callback.onClick()
                 }
             }
