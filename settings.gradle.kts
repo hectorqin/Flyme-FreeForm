@@ -3,7 +3,7 @@ pluginManagement {
         gradlePluginPortal()
         google()
         mavenCentral()
-        maven { url 'https://jitpack.io' }
+        maven("https://jitpack.io")
     }
 }
 dependencyResolutionManagement {
@@ -11,11 +11,11 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url 'https://jitpack.io' }
-        maven { url 'https://api.xposed.info' }
+        maven("https://jitpack.io")
+        maven("https://api.xposed.info")
     }
 }
 
 rootProject.name = "Flyme-Freeform"
-include ':app'
-include ':hidden-api'
+include(":app")
+include(":hidden-api")

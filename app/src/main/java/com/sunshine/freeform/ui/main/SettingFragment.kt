@@ -58,6 +58,10 @@ class SettingFragment : PreferenceFragmentCompat(), Preference.OnPreferenceClick
         findPreference<IntegerSimpleMenuPreference>(SERVICE_TYPE)!!.onPreferenceChangeListener = this
         findPreference<SeekBarPreference>(FREEFORM_SCALE)!!.apply {
             onPreferenceClickListener = this@SettingFragment
+            onPreferenceChangeListener = this@SettingFragment
+        }
+        findPreference<SeekBarPreference>(FREEFORM_SIZE)!!.apply {
+            onPreferenceChangeListener = this@SettingFragment
         }
     }
 
@@ -163,6 +167,22 @@ class SettingFragment : PreferenceFragmentCompat(), Preference.OnPreferenceClick
                     }
                 }
             }
+            FREEFORM_SCALE -> {
+                // 确保 freeform_scale 的值在 50-500 之间
+                val value = (newValue as Int).coerceIn(50, 500)
+                if (value != newValue) {
+                    (preference as SeekBarPreference).value = value
+                    return false
+                }
+            }
+            FREEFORM_SIZE -> {
+                // 确保 freeform_size 的值在 10-100 之间
+                val value = (newValue as Int).coerceIn(10, 100)
+                if (value != newValue) {
+                    (preference as SeekBarPreference).value = value
+                    return false
+                }
+            }
         }
         return true
     }
@@ -182,5 +202,6 @@ class SettingFragment : PreferenceFragmentCompat(), Preference.OnPreferenceClick
         private const val RESET_OVERLAY_SETTING = "reset_overlay_setting"
         private const val SERVICE_TYPE = "service_type"
         private const val FREEFORM_SCALE = "freeform_scale"
+        private const val FREEFORM_SIZE = "freeform_size"
     }
 }

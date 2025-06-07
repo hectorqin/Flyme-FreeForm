@@ -11,7 +11,6 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.sunshine.freeform.R
 import com.sunshine.freeform.databinding.ActivityMainBinding
-import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -50,9 +49,9 @@ class MainActivity : AppCompatActivity() {
             isUserInputEnabled = false
             offscreenPageLimit = 2
         }
-        navView.apply {
-            setOnItemSelectedListener {
-                when (it.itemId) {
+        binding.navView.apply {
+            setOnItemSelectedListener { item ->
+                when (item.itemId) {
                     R.id.navigation_home -> {
                         binding.viewPager.currentItem = 0
                     }

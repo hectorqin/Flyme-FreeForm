@@ -36,7 +36,7 @@
             android:title="@string/setting_freeform_dpi_title"
             app:iconSpaceReserved="false"
             app:defaultValue="50"
-            app:min="50"
+            app:min="0"
             android:max="500"
             app:showSeekBarValue="true"/>
 
@@ -45,7 +45,7 @@
             android:title="@string/setting_freeform_size"
             app:iconSpaceReserved="false"
             app:defaultValue="75"
-            app:min="10"
+            app:min="0"
             android:max="100"
             app:showSeekBarValue="true"/>
 
@@ -54,7 +54,7 @@
             android:title="@string/setting_freeform_size_landspace"
             app:iconSpaceReserved="false"
             app:defaultValue="90"
-            app:min="10"
+            app:min="0"
             android:max="100"
             app:showSeekBarValue="true"/>
 
@@ -63,7 +63,7 @@
             android:title="@string/setting_freeform_float_size"
             app:iconSpaceReserved="false"
             app:defaultValue="20"
-            app:min="10"
+            app:min="0"
             android:max="50"
             app:showSeekBarValue="true" />
 

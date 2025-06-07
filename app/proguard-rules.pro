@@ -31,3 +31,16 @@
 
 #避免对AIDL混淆
 -keep class * implements android.os.IInterface {*;}
+
+# 保持Preference相关类不被混淆
+-keep class androidx.preference.** { *; }
+-keep class * extends androidx.preference.Preference { *; }
+-keep class * extends androidx.preference.PreferenceFragmentCompat { *; }
+-keep class * extends androidx.preference.PreferenceScreen { *; }
+-keep class * extends androidx.preference.PreferenceCategory { *; }
+-keep class * extends androidx.preference.SwitchPreference { *; }
+-keep class * extends androidx.preference.SeekBarPreference { *; }
+-keep class * extends androidx.preference.PreferenceViewHolder { *; }
+
+# 保持自定义Preference类不被混淆
+-keep class com.sunshine.freeform.ui.view.** { *; }
