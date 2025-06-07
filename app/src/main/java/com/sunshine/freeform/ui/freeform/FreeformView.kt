@@ -649,10 +649,10 @@ class FreeformView(
             type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
             width = WindowManager.LayoutParams.MATCH_PARENT
             height = WindowManager.LayoutParams.MATCH_PARENT
-            flags = windowLayoutParams.flags or
+            flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
                     WindowManager.LayoutParams.FLAG_DIM_BEHIND or
-                    WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH xor
-                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
         }
 
         runCatching {
@@ -1050,13 +1050,19 @@ class FreeformView(
     private fun handleToFloatScale(dx: Float, dy: Float) {
         if (isFloating) return
 
+        val ratio = if (virtualDisplayRotation == VIRTUAL_DISPLAY_ROTATION_LANDSCAPE) {
+            1 / config.widthHeightRatio
+        } else {
+            config.widthHeightRatio
+        }
+
         if (dy != 0f) {
             val tempHeight = freeformHeight + dy
             if (tempHeight >= hangUpViewHeight && tempHeight <= rootHeight * 0.9) {
                 freeformHeight += dy.roundToInt()
 
                 val contentHeight = freeformHeight - cardHeightMargin
-                val contentWidth = contentHeight * config.widthHeightRatio
+                val contentWidth = contentHeight * ratio
                 freeformWidth = (contentWidth + cardWidthMargin).roundToInt()
 
                 mScaleX = freeformWidth / rootWidth.toFloat()
@@ -1070,7 +1076,7 @@ class FreeformView(
                 freeformWidth += dx.roundToInt()
 
                 val contentWidth = freeformWidth - cardWidthMargin
-                val contentHeight = contentWidth / config.widthHeightRatio
+                val contentHeight = contentWidth / ratio
                 freeformHeight = (contentHeight + cardHeightMargin).roundToInt()
 
                 mScaleX = freeformWidth / rootWidth.toFloat()
@@ -1849,11 +1855,14 @@ class FreeformView(
         }
 
         override fun onTaskDisplayChanged(tId: Int, newDisplayId: Int) {
+            if (newDisplayId == virtualDisplay.display.displayId && !taskList.contains(tId)) {
+                taskList.add(tId)
+            }
+
             if (taskList.contains(tId) && isFloating && newDisplayId == Display.DEFAULT_DISPLAY) {
                 context.startService(Intent(context, FreeformService::class.java).setAction(FreeformService.ACTION_START_INTENT).putExtra(Intent.EXTRA_INTENT, config.intent))
                 return
             }
-            if (taskList.contains(tId) && newDisplayId == virtualDisplay.display.displayId) taskList.contains(tId)
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 if (!isDestroy && taskList.contains(tId) && newDisplayId == Display.DEFAULT_DISPLAY) {
