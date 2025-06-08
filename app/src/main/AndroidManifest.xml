@@ -11,6 +11,9 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.RECEIVE_USER_PRESENT" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.SYSTEM_APPLICATION_OVERLAY"
+        tools:ignore="ProtectedPermissions" />
+
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
@@ -56,7 +59,8 @@
             android:name=".ui.main.MainActivity"
             android:exported="false" />
         <activity android:name=".ui.floating_apps_sort.FloatingAppsSortActivity" />
-        <activity android:name=".ui.choose_apps.ChooseAppsFragment" />
+        <activity android:name=".ui.choose_apps.ChooseAppsFragment"
+            tools:ignore="Instantiatable" />
         <activity
             android:name=".ui.guide.GuideActivity"
             android:exported="false" />

@@ -691,7 +691,7 @@ class FreeformView(
     }
 
     /**
-     * 禁用更新过渡动画
+     * 禁用更新过渡动画并添加系统应用覆盖标志
      */
     private fun setWindowNoUpdateAnimation() {
         val classname = "android.view.WindowManager\$LayoutParams"
@@ -699,9 +699,13 @@ class FreeformView(
             val layoutParamsClass: Class<*> = Class.forName(classname)
             val privateFlags: Field = layoutParamsClass.getField("privateFlags")
             val noAnim: Field = layoutParamsClass.getField("PRIVATE_FLAG_NO_MOVE_ANIMATION")
+            val sysAppOverlay: Field = layoutParamsClass.getField("PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY")
+            
             var privateFlagsValue: Int = privateFlags.getInt(windowLayoutParams)
             val noAnimFlag: Int = noAnim.getInt(windowLayoutParams)
-            privateFlagsValue = privateFlagsValue or noAnimFlag
+            val sysAppOverlayFlag: Int = sysAppOverlay.getInt(windowLayoutParams)
+            
+            privateFlagsValue = privateFlagsValue or noAnimFlag or sysAppOverlayFlag
             privateFlags.setInt(windowLayoutParams, privateFlagsValue)
         }
     }
@@ -712,9 +716,14 @@ class FreeformView(
             val layoutParamsClass: Class<*> = Class.forName(classname)
             val privateFlags: Field = layoutParamsClass.getField("privateFlags")
             val noAnim: Field = layoutParamsClass.getField("PRIVATE_FLAG_NO_MOVE_ANIMATION")
+            val sysAppOverlay: Field = layoutParamsClass.getField("PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY")
+            
             var privateFlagsValue: Int = privateFlags.getInt(windowLayoutParams)
             val noAnimFlag: Int = noAnim.getInt(windowLayoutParams)
-            privateFlagsValue = privateFlagsValue and noAnimFlag.inv()
+            val sysAppOverlayFlag: Int = sysAppOverlay.getInt(windowLayoutParams)
+            
+            // 移除动画标志但保留系统应用覆盖标志
+            privateFlagsValue = (privateFlagsValue and noAnimFlag.inv()) or sysAppOverlayFlag
             privateFlags.setInt(windowLayoutParams, privateFlagsValue)
         }
     }
