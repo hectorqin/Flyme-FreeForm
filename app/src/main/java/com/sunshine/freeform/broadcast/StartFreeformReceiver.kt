@@ -11,7 +11,7 @@ class StartFreeformReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val packageName = intent.getStringExtra("packageName")
         val activityName = intent.getStringExtra("activityName")
-        val userId = intent.getIntExtra("userId", -1)
+        val userId = intent.getLongExtra("userId", (-1F).toLong()).toInt()
         val extras = intent.getStringExtra("extras")
         val parcelable = intent.getParcelableExtra<Parcelable>(Intent.EXTRA_INTENT)
         var target = Intent()

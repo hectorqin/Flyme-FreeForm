@@ -1835,11 +1835,13 @@ class FreeformView(
 
     @RequiresApi(Build.VERSION_CODES.Q)
     private inner class MTaskStackListener : TaskStackListener() {
+        private var destroyJob: Job? = null
         override fun onTaskCreated(tId: Int, componentName: ComponentName?) {
             if (config.intent !is Intent) return
             if (componentName?.packageName == config.componentName?.packageName) {
                 taskList.add(tId)
             }
+            destroyJob?.cancel()
         }
 
         override fun onTaskRemoved(taskId: Int) {
@@ -1848,15 +1850,24 @@ class FreeformView(
 
         override fun onTaskRemovalStarted(taskInfo: ActivityManager.RunningTaskInfo) {
             if (taskList.contains(taskInfo.taskId)) {
-                scope.launch(Dispatchers.Main) {
-                    destroy()
+                taskList.remove(taskInfo.taskId)
+                if (taskList.isEmpty()) {
+                    destroyJob = scope.launch {
+                        delay(250)
+                        if (!isDestroy) {
+                            destroy()
+                        }
+                    }
                 }
             }
         }
 
         override fun onTaskDisplayChanged(tId: Int, newDisplayId: Int) {
-            if (newDisplayId == virtualDisplay.display.displayId && !taskList.contains(tId)) {
-                taskList.add(tId)
+            if (newDisplayId == virtualDisplay.display.displayId) {
+                destroyJob?.cancel()
+                if (!taskList.contains(tId)) {
+                    taskList.add(tId)
+                }
             }
 
             if (taskList.contains(tId) && isFloating && newDisplayId == Display.DEFAULT_DISPLAY) {

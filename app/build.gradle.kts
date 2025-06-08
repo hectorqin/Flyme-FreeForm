@@ -96,9 +96,6 @@ dependencies {
     implementation(files("libs/Tinypinyin-3.0.0.jar"))
 
     compileOnly(project(":hidden-api"))
-
-    implementation("com.google.code.findbugs:jsr305:3.0.2")
-    implementation("org.ahocorasick:ahocorasick:0.4.0")
 }
 
 configure<StringFogExtension> {
