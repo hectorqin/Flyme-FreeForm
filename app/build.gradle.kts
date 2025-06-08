@@ -93,7 +93,7 @@ dependencies {
 
     implementation("com.github.halifox:androidx.preference.material3:1.2.1-alpha07")
 
-    implementation(files("libs/Tinypinyin-3.0.0.jar"))
+    implementation("com.github.promeg:tinypinyin:2.0.3")
 
     compileOnly(project(":hidden-api"))
 }

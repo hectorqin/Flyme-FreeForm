@@ -44,3 +44,6 @@
 
 # 保持自定义Preference类不被混淆
 -keep class com.sunshine.freeform.ui.view.** { *; }
+
+# 禁止警告缺失的Nullable注解类
+-dontwarn javax.annotation.Nullable
