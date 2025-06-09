@@ -843,7 +843,7 @@ class FreeformView(
         if (FreeformHelper.screenIsPortrait(screenRotation)) {
             // 竖屏状态，以宽度为基准计算，确保宽高比正确
             freeformWidth = (rootWidth * config.freeformSize).roundToInt()
-            val contentHeight = (freeformWidth - cardWidthMargin) / config.widthHeightRatio
+            val contentHeight = (freeformWidth - (freeformShadow * 2)) / config.widthHeightRatio
             freeformHeight = (contentHeight + cardHeightMargin).roundToInt()
         } else {
             // 横屏状态保持原有逻辑
@@ -1072,7 +1072,11 @@ class FreeformView(
 
                 val contentHeight = freeformHeight - cardHeightMargin
                 val contentWidth = contentHeight * ratio
-                freeformWidth = (contentWidth + cardWidthMargin).roundToInt()
+                if (FreeformHelper.screenIsPortrait(screenRotation)) {
+                    freeformWidth = (contentWidth + (freeformShadow * 2)).roundToInt()
+                } else {
+                    freeformWidth = (contentWidth + cardWidthMargin).roundToInt()
+                }
 
                 mScaleX = freeformWidth / rootWidth.toFloat()
                 mScaleY = freeformHeight / rootHeight.toFloat()
@@ -1084,7 +1088,11 @@ class FreeformView(
             if (tempWidth >= hangUpViewWidth && tempWidth <= rootWidth * 0.9) {
                 freeformWidth += dx.roundToInt()
 
-                val contentWidth = freeformWidth - cardWidthMargin
+                val contentWidth = if (FreeformHelper.screenIsPortrait(screenRotation)) {
+                    freeformWidth - (freeformShadow * 2)
+                } else {
+                    freeformWidth - cardWidthMargin
+                }
                 val contentHeight = contentWidth / ratio
                 freeformHeight = (contentHeight + cardHeightMargin).roundToInt()
 
