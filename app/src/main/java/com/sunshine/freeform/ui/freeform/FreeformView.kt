@@ -20,6 +20,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.SystemClock
 import android.provider.Settings
+import android.util.Log
 import android.view.*
 import android.view.animation.*
 import android.widget.Toast
@@ -297,11 +298,20 @@ class FreeformView(
     private val taskStackListener = MTaskStackListener()
 
     fun initSystemService() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            setDisplayIdMethod = InputEvent::class.java.getMethod("setDisplayId", Int::class.javaPrimitiveType)
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            activityTaskManager.registerTaskStackListener(taskStackListener)
+        try {
+            if (!rikka.shizuku.Shizuku.pingBinder()) {
+                Log.e(TAG, "Shizuku binder is not available")
+                return
+            }
+            
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                setDisplayIdMethod = InputEvent::class.java.getMethod("setDisplayId", Int::class.javaPrimitiveType)
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                activityTaskManager.registerTaskStackListener(taskStackListener)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to initialize system services", e)
         }
     }
 

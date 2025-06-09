@@ -15,12 +15,15 @@ import android.os.Build
 import android.os.IBinder
 import android.os.Parcelable
 import android.os.SystemClock
+import android.util.Log
 import android.view.Display
 import com.sunshine.freeform.utils.ServiceUtils
 import com.sunshine.freeform.utils.ServiceUtils.activityManager
 import dev.rikka.tools.refine.Refine
 
 class FreeformService: Service(), ScreenListener.ScreenStateListener {
+    private val TAG = "FreeformService"
+    
     private lateinit var mFreeformView: FreeformView
     private lateinit var mScreenListener: ScreenListener
     private var mConfig = FreeformConfig()
@@ -77,7 +80,11 @@ class FreeformService: Service(), ScreenListener.ScreenStateListener {
         }
 
     override fun onCreate() {
-        ServiceUtils.initWithShizuku(this)
+        if (!ServiceUtils.initWithShizuku(this)) {
+            Log.e(TAG, "Failed to initialize Shizuku services")
+            stopSelf()
+            return
+        }
 
         mScreenListener = ScreenListener(this)
         mScreenListener.addScreenStateListener(this)

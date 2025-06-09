@@ -7,6 +7,7 @@ import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import androidx.lifecycle.*
 import com.google.android.material.color.DynamicColors
 import com.sunshine.freeform.BuildConfig
@@ -115,8 +116,25 @@ class MiFreeform : Application() {
 
     fun initShizuku() {
         if (pingServiceBinder()) return
+        
         bindShizukuService()
-        ServiceUtils.initWithShizuku(this)
+        
+        // 尝试初始化ServiceUtils，如果失败则不继续执行
+        if (!ServiceUtils.initWithShizuku(this)) {
+            Log.e(TAG, "Failed to initialize Shizuku services")
+            // 系统服务初始化失败，可能是Shizuku未就绪
+            isRunning.postValue(false)
+        }
+    }
+
+    // 添加重试机制，可以重新尝试初始化Shizuku
+    fun retryInitShizuku() {
+        if (Shizuku.pingBinder()) {
+            initShizuku()
+        } else {
+            // Shizuku服务不可用，等待服务恢复
+            Log.w(TAG, "Shizuku service is not available, waiting for connection...")
+        }
     }
 
     fun pingServiceBinder(): Boolean {

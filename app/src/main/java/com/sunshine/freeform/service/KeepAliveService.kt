@@ -7,7 +7,9 @@ import android.content.res.Configuration
 import android.graphics.PixelFormat
 import android.hardware.display.DisplayManager
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
+import android.util.Log
 import android.view.*
 import android.view.accessibility.AccessibilityEvent
 import android.widget.Toast
@@ -17,6 +19,7 @@ import com.sunshine.freeform.broadcast.StartFreeformReceiver
 import com.sunshine.freeform.ui.floating.ChooseAppFloatingView
 import com.sunshine.freeform.ui.freeform.FreeformService
 import kotlinx.coroutines.*
+import rikka.shizuku.Shizuku
 import rikka.shizuku.ShizukuBinderWrapper
 import rikka.shizuku.SystemServiceHelper
 import kotlin.math.max
@@ -106,43 +109,55 @@ class KeepAliveService : AccessibilityService(), SharedPreferences.OnSharedPrefe
 
         registerReceiver(startFreeformReceiver, IntentFilter("com.sunshine.freeform.start_freeform"), RECEIVER_EXPORTED)
 
-        iWindowManager = IWindowManager.Stub.asInterface(
-            ShizukuBinderWrapper(
-                SystemServiceHelper.getSystemService("window"))
-        )
-        rotationWatcher = object : IRotationWatcher.Stub() {
-            override fun onRotationChanged(rotation: Int) {
-                scope.launch(Dispatchers.Main) {
-                    displayRotation = rotation
+        try {
+            // 检查Shizuku是否可用
+            if (!Shizuku.pingBinder()) {
+                Log.e(TAG, "Shizuku binder is not available, waiting for connection...")
+                // 尝试重新初始化
+                MiFreeform.me.retryInitShizuku()
+                return
+            }
+            
+            iWindowManager = IWindowManager.Stub.asInterface(
+                ShizukuBinderWrapper(
+                    SystemServiceHelper.getSystemService("window"))
+            )
+            rotationWatcher = object : IRotationWatcher.Stub() {
+                override fun onRotationChanged(rotation: Int) {
+                    scope.launch(Dispatchers.Main) {
+                        displayRotation = rotation
 
-                    //q220902.3 如果程序崩溃的话，那么resources.configuration.orientation获取到的方向是错误的，所以不应该用该方法
-                    val tempScreenRotation = if (displayRotation == Surface.ROTATION_0 || displayRotation == Surface.ROTATION_180) {
-                        Configuration.ORIENTATION_PORTRAIT
-                    } else {
-                        Configuration.ORIENTATION_LANDSCAPE
-                    }
-
-                    if (tempScreenRotation != screenRotation) {
-                        screenRotation = tempScreenRotation
-
-                        if (screenRotation == Configuration.ORIENTATION_PORTRAIT) {
-                            screenHeight = max(resources.displayMetrics.widthPixels, resources.displayMetrics.heightPixels)
-                            screenWidth = min(resources.displayMetrics.widthPixels, resources.displayMetrics.heightPixels)
+                        //q220902.3 如果程序崩溃的话，那么resources.configuration.orientation获取到的方向是错误的，所以不应该用该方法
+                        val tempScreenRotation = if (displayRotation == Surface.ROTATION_0 || displayRotation == Surface.ROTATION_180) {
+                            Configuration.ORIENTATION_PORTRAIT
                         } else {
-                            screenWidth = max(resources.displayMetrics.widthPixels, resources.displayMetrics.heightPixels)
-                            screenHeight = min(resources.displayMetrics.widthPixels, resources.displayMetrics.heightPixels)
+                            Configuration.ORIENTATION_LANDSCAPE
                         }
 
-                        removeFloating()
-                        initConfig()
-                        try {
-                            chooseAppFloatingView.onScreenRotationChanged(screenRotation)
-                        } catch (e: Exception) {}
+                        if (tempScreenRotation != screenRotation) {
+                            screenRotation = tempScreenRotation
+
+                            if (screenRotation == Configuration.ORIENTATION_PORTRAIT) {
+                                screenHeight = max(resources.displayMetrics.widthPixels, resources.displayMetrics.heightPixels)
+                                screenWidth = min(resources.displayMetrics.widthPixels, resources.displayMetrics.heightPixels)
+                            } else {
+                                screenWidth = max(resources.displayMetrics.widthPixels, resources.displayMetrics.heightPixels)
+                                screenHeight = min(resources.displayMetrics.widthPixels, resources.displayMetrics.heightPixels)
+                            }
+
+                            removeFloating()
+                            initConfig()
+                            try {
+                                chooseAppFloatingView.onScreenRotationChanged(screenRotation)
+                            } catch (e: Exception) {}
+                        }
                     }
                 }
             }
+            iWindowManager.watchRotation(rotationWatcher, Display.DEFAULT_DISPLAY)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error initializing Shizuku", e)
         }
-        iWindowManager.watchRotation(rotationWatcher, Display.DEFAULT_DISPLAY)
 
         displayManager = getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
         displayManager.registerDisplayListener(displayListener, null)
@@ -169,8 +184,6 @@ class KeepAliveService : AccessibilityService(), SharedPreferences.OnSharedPrefe
     override fun onInterrupt() {
 
     }
-
-
 
     override fun onDestroy() {
         super.onDestroy()

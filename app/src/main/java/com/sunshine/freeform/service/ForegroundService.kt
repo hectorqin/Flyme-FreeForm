@@ -30,6 +30,7 @@ import com.sunshine.freeform.ui.freeform.FreeformService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import rikka.shizuku.Shizuku
 import rikka.shizuku.ShizukuBinderWrapper
 import rikka.shizuku.SystemServiceHelper
 import kotlin.math.max
@@ -120,60 +121,72 @@ class ForegroundService : Service(), SharedPreferences.OnSharedPreferenceChangeL
             registerReceiver(startFreeformReceiver, IntentFilter("com.sunshine.freeform.start_freeform"), RECEIVER_EXPORTED)
 
             //q221208.1 修复屏幕旋转后侧边栏不贴边的问题
-            iWindowManager = IWindowManager.Stub.asInterface(
-                ShizukuBinderWrapper(
-                    SystemServiceHelper.getSystemService("window"))
-            )
-            rotationWatcher = object : IRotationWatcher.Stub() {
-                override fun onRotationChanged(rotation: Int) {
-                    scope.launch(Dispatchers.Main) {
-                        displayRotation = rotation
+            try {
+                // 检查Shizuku是否可用
+                if (!Shizuku.pingBinder()) {
+                    Log.e(TAG, "Shizuku binder is not available, waiting for connection...")
+                    // 尝试重新初始化
+                    MiFreeform.me.retryInitShizuku()
+                    return
+                }
+                
+                iWindowManager = IWindowManager.Stub.asInterface(
+                    ShizukuBinderWrapper(
+                        SystemServiceHelper.getSystemService("window"))
+                )
+                rotationWatcher = object : IRotationWatcher.Stub() {
+                    override fun onRotationChanged(rotation: Int) {
+                        scope.launch(Dispatchers.Main) {
+                            displayRotation = rotation
 
-                        //q220902.3 如果程序崩溃的话，那么resources.configuration.orientation获取到的方向是错误的，所以不应该用该方法
-                        val tempScreenRotation = if (displayRotation == Surface.ROTATION_0 || displayRotation == Surface.ROTATION_180) {
-                            Configuration.ORIENTATION_PORTRAIT
-                        } else {
-                            Configuration.ORIENTATION_LANDSCAPE
-                        }
-
-                        if (tempScreenRotation != screenRotation) {
-                            screenRotation = tempScreenRotation
-
-                            if (screenRotation == Configuration.ORIENTATION_PORTRAIT) {
-                                screenHeight = max(resources.displayMetrics.widthPixels, resources.displayMetrics.heightPixels)
-                                screenWidth = min(resources.displayMetrics.widthPixels, resources.displayMetrics.heightPixels)
+                            //q220902.3 如果程序崩溃的话，那么resources.configuration.orientation获取到的方向是错误的，所以不应该用该方法
+                            val tempScreenRotation = if (displayRotation == Surface.ROTATION_0 || displayRotation == Surface.ROTATION_180) {
+                                Configuration.ORIENTATION_PORTRAIT
                             } else {
-                                screenWidth = max(resources.displayMetrics.widthPixels, resources.displayMetrics.heightPixels)
-                                screenHeight = min(resources.displayMetrics.widthPixels, resources.displayMetrics.heightPixels)
+                                Configuration.ORIENTATION_LANDSCAPE
                             }
 
-                            removeFloating()
-                            initConfig()
-                            try {
-                                chooseAppFloatingView.onScreenRotationChanged(screenRotation)
-                            } catch (e: Exception) {}
+                            if (tempScreenRotation != screenRotation) {
+                                screenRotation = tempScreenRotation
+
+                                if (screenRotation == Configuration.ORIENTATION_PORTRAIT) {
+                                    screenHeight = max(resources.displayMetrics.widthPixels, resources.displayMetrics.heightPixels)
+                                    screenWidth = min(resources.displayMetrics.widthPixels, resources.displayMetrics.heightPixels)
+                                } else {
+                                    screenWidth = max(resources.displayMetrics.widthPixels, resources.displayMetrics.heightPixels)
+                                    screenHeight = min(resources.displayMetrics.widthPixels, resources.displayMetrics.heightPixels)
+                                }
+
+                                removeFloating()
+                                initConfig()
+                                try {
+                                    chooseAppFloatingView.onScreenRotationChanged(screenRotation)
+                                } catch (e: Exception) {}
+                            }
                         }
                     }
                 }
+                iWindowManager.watchRotation(rotationWatcher, Display.DEFAULT_DISPLAY)
+
+                displayManager = getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
+                displayManager.registerDisplayListener(displayListener, null)
+                defaultDisplay = displayManager.getDisplay(Display.DEFAULT_DISPLAY)
+
+                windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+                windowLayoutParams = WindowManager.LayoutParams()
+
+                gestureDetector = GestureDetector(this, this)
+
+                screenWidth = resources.displayMetrics.widthPixels
+                screenHeight = resources.displayMetrics.heightPixels
+                screenRotation = resources.configuration.orientation
+
+                initConfig()
+                chooseAppFloatingView = ChooseAppFloatingView(this, config.positionX, this)
+                startService(Intent(this, FreeformService::class.java))
+            } catch (e: Exception) {
+                Toast.makeText(this, getString(R.string.request_overlay_permission_fail), Toast.LENGTH_LONG).show()
             }
-            iWindowManager.watchRotation(rotationWatcher, Display.DEFAULT_DISPLAY)
-
-            displayManager = getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
-            displayManager.registerDisplayListener(displayListener, null)
-            defaultDisplay = displayManager.getDisplay(Display.DEFAULT_DISPLAY)
-
-            windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
-            windowLayoutParams = WindowManager.LayoutParams()
-
-            gestureDetector = GestureDetector(this, this)
-
-            screenWidth = resources.displayMetrics.widthPixels
-            screenHeight = resources.displayMetrics.heightPixels
-            screenRotation = resources.configuration.orientation
-
-            initConfig()
-            chooseAppFloatingView = ChooseAppFloatingView(this, config.positionX, this)
-            startService(Intent(this, FreeformService::class.java))
         } else {
             //如果不是前台服务模式，则关闭服务
             stopSelf()
