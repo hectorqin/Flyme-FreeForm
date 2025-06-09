@@ -869,7 +869,7 @@ class FreeformView(
         if (virtualDisplayRotation == VIRTUAL_DISPLAY_ROTATION_LANDSCAPE) {
             if (freeformHeight > rootWidth) {
                 freeformWidth = (rootWidth - (rootWidth * 0.05)).roundToInt()
-                freeformHeight = ((freeformWidth + (cardHeightMargin * 2)) * config.widthHeightRatio) .roundToInt()
+                freeformHeight = ((freeformWidth + (cardHeightMargin * 1.75)) * config.widthHeightRatio) .roundToInt()
             }
             if (!FreeformHelper.screenIsPortrait(screenRotation)) {
                 freeformWidth = (realScreenWidth / 2 + cardWidthMargin).roundToInt()
