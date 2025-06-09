@@ -70,6 +70,10 @@ class FreeformView(
     //该小窗是否已经销毁
     var isDestroy = false
 
+    // 修复动画过程中调整方向导致的问题
+    private var isAnimating = false
+    private var pendingOrientationChange = false
+
     //是否处于隐藏状态，当打开米窗的正在运行小窗界面时，应当隐藏所有小窗
     var isHidden = false
 
@@ -1137,6 +1141,7 @@ class FreeformView(
                     )
                     addListener(
                         onStart = {
+                            isAnimating = true
                             val windowCoordinate = intArrayOf(
                                 windowLayoutParams.x,
                                 windowLayoutParams.y,
@@ -1193,6 +1198,12 @@ class FreeformView(
                                         binding.textureView.setOnTouchListener(FloatViewTouchListener())
 
                                         setWindowEnableUpdateAnimation()
+
+                                        isAnimating = false
+                                        if (pendingOrientationChange) {
+                                            pendingOrientationChange = false
+                                            onFreeFormRotationChanged()
+                                        }
                                     },
                                 )
                                 start()
@@ -1218,7 +1229,9 @@ class FreeformView(
                         ),
                     )
                     addListener(
+                        onStart = { isAnimating = true },
                         onEnd = {
+                            isAnimating = false
                             context.startService(
                                 Intent(context, FreeformService::class.java)
                                     .setAction(FreeformService.ACTION_CALL_INTENT)
@@ -1237,6 +1250,16 @@ class FreeformView(
                     playTogether(
                         ObjectAnimator.ofFloat(binding.freeformRoot, View.SCALE_X, mScaleX, restoreScale[0]),
                         ObjectAnimator.ofFloat(binding.freeformRoot, View.SCALE_Y, mScaleY, restoreScale[1]),
+                    )
+                    addListener(
+                        onStart = { isAnimating = true },
+                        onEnd = {
+                            isAnimating = false
+                            if (pendingOrientationChange) {
+                                pendingOrientationChange = false
+                                onFreeFormRotationChanged()
+                            }
+                        }
                     )
                     duration = 300
                     interpolator = OvershootInterpolator(1.5f)
@@ -1545,6 +1568,7 @@ class FreeformView(
 
                 addListener(
                     onStart = {
+                        isAnimating = true
                         backgroundView.visibility = View.VISIBLE
                         windowManager.updateViewLayout(binding.root, windowLayoutParams.apply {
                             height = rootHeight
@@ -1553,6 +1577,13 @@ class FreeformView(
                         binding.freeformRoot.scaleX = mScaleX
                         binding.freeformRoot.scaleY = mScaleY
                         binding.cardRoot.radius = context.resources.getDimension(R.dimen.card_corner_radius)
+                    },
+                    onEnd = {
+                        isAnimating = false
+                        if (pendingOrientationChange) {
+                            pendingOrientationChange = false
+                            onFreeFormRotationChanged()
+                        }
                     }
                 )
             }
@@ -1573,6 +1604,7 @@ class FreeformView(
                 )
                 addListener(
                     onStart = {
+                        isAnimating = true
                         AnimatorSet().apply {
                             startDelay = 95
                             addListener(
@@ -1632,6 +1664,11 @@ class FreeformView(
                     },
                     onEnd = {
                         backgroundView.visibility = View.VISIBLE
+                        isAnimating = false
+                        if (pendingOrientationChange) {
+                            pendingOrientationChange = false
+                            onFreeFormRotationChanged()
+                        }
                     }
                 )
                 duration = 300
@@ -1933,6 +1970,12 @@ class FreeformView(
             }
             if (taskList.contains(tId) && tempRotation != virtualDisplayRotation) {
                 virtualDisplayRotation = tempRotation
+                if (isAnimating) {
+                    pendingOrientationChange = true
+                    orientationChangeJob?.cancel()
+                    return
+                }
+
                 orientationChangeJob?.cancel()
                 orientationChangeJob = scope.launch(Dispatchers.Main) {
                     // 增加防抖，避免过于频繁的刷新
