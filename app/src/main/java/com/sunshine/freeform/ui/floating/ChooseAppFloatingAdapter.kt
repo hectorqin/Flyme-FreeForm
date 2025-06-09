@@ -86,7 +86,11 @@ class ChooseAppFloatingAdapter(
                 holder.icon.setImageResource(R.drawable.ic_add)
                 holder.appName.text = context.getString(R.string.edit_apps)
                 holder.click.setOnClickListener {
-                    context.startActivity(Intent(context, ChooseAppsFragment::class.java).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) })
+                    val intent = Intent(context, com.sunshine.freeform.ui.main.MainActivity::class.java).apply {
+                        action = "NAVIGATE_TO_CHOOSE_APPS"
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    }
+                    context.startActivity(intent)
                     callback.onClick()
                 }
             }

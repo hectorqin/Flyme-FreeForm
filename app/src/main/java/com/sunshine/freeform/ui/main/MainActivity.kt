@@ -13,6 +13,7 @@ import com.sunshine.freeform.R
 import com.sunshine.freeform.databinding.ActivityMainBinding
 import com.sunshine.freeform.ui.choose_apps.ChooseAppsFragment
 import java.util.*
+import android.content.Intent
 
 class MainActivity : AppCompatActivity() {
 
@@ -35,7 +36,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun createFragment(position: Int): Fragment {
-                    return when(position) {
+                    return when (position) {
                         0 -> HomeFragment()
                         1 -> ChooseAppsFragment()
                         else -> SettingFragment()
@@ -57,16 +58,20 @@ class MainActivity : AppCompatActivity() {
                     R.id.navigation_home -> {
                         binding.viewPager.currentItem = 0
                     }
+
                     R.id.navigation_apps -> {
                         binding.viewPager.currentItem = 1
                     }
-                    else ->  {
+
+                    else -> {
                         binding.viewPager.currentItem = 2
                     }
                 }
                 true
             }
         }
+
+        handleIntent(intent)
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -75,7 +80,23 @@ class MainActivity : AppCompatActivity() {
                 || super.onSupportNavigateUp()
     }
 
-    fun changeToSetting() {
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        if (intent?.action == "NAVIGATE_TO_CHOOSE_APPS") {
+            changeToChooseApps()
+        }
+    }
+
+    private fun changeToChooseApps() {
         binding.viewPager.currentItem = 1
+    }
+
+    fun changeToSetting() {
+        binding.viewPager.currentItem = 2
     }
 }
