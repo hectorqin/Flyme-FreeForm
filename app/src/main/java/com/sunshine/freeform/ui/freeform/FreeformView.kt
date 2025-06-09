@@ -859,7 +859,7 @@ class FreeformView(
             }
             if (!FreeformHelper.screenIsPortrait(screenRotation)) {
                 freeformWidth = (realScreenWidth / 2 + cardWidthMargin).roundToInt()
-                freeformHeight = (freeformWidth * config.widthHeightRatio).roundToInt()
+                freeformHeight = ((freeformWidth * config.widthHeightRatio) * 0.95).roundToInt()
             }
         }
     }
