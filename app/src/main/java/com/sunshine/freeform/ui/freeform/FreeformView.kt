@@ -1853,6 +1853,7 @@ class FreeformView(
     @RequiresApi(Build.VERSION_CODES.Q)
     private inner class MTaskStackListener : TaskStackListener() {
         private var destroyJob: Job? = null
+        private var orientationChangeJob: Job? = null
         override fun onTaskCreated(tId: Int, componentName: ComponentName?) {
             if (config.intent !is Intent) return
             if (componentName?.packageName == config.componentName?.packageName) {
@@ -1922,7 +1923,10 @@ class FreeformView(
             }
             if (taskList.contains(tId) && tempRotation != virtualDisplayRotation) {
                 virtualDisplayRotation = tempRotation
-                scope.launch(Dispatchers.Main) {
+                orientationChangeJob?.cancel()
+                orientationChangeJob = scope.launch(Dispatchers.Main) {
+                    // 增加防抖，避免过于频繁的刷新
+                    delay(100)
                     onFreeFormRotationChanged()
                 }
             }
