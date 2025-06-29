@@ -62,6 +62,9 @@
     <!--ChooseAppFloatingView-->
     <string name="request_overlay_permission_fail">无法跳转到设置界面，请手动前往设置开启米窗的"显示在其他应用界面的上层"权限</string>
     <string name="request_overlay_permission">请选择米窗开启"显示在其他应用界面的上层"权限</string>
+    <string name="request_accessibility_permission">请开启米窗的无障碍服务以正常工作。</string>
+    <string name="request_accessibility_permission_fail">打开无障碍设置失败，请手动开启。</string>
+    <string name="create_freeform_fail">创建小窗失败，请重试。</string>
 
     <!--ChooseAppsFragment-->
     <string name="label_floating_apps">侧边栏快捷应用选择</string>

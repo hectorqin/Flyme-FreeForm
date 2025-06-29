@@ -161,7 +161,7 @@
     <string name="welcome">歡迎使用米窗</string>
     <string name="guide_a">通過下面嘅教程，你將會更快地上手米窗</string>
     <string name="button_step_a">一、使用米窗前嘅準備</string>
-    <string name="guide_a_text">\t\t<font color="red"><b>特別提醒：米窗無法喺Vulkan模式下運行，如果你開啟過類似選項（如萬花筒ROM-設定-系統-實驗室中"使用Vulkan進行HWUI渲染"），請關閉該選項後，強行停止米窗再運行，否則將閃退！請注意，切換Vulkan選項可能會導致設備無法啟動，請唔好在主要設備
+    <string name="guide_a_text">\t\t<font color="red"><b>特別提醒：米窗無法喺Vulkan模式下運行，如果你開啟過類似選項（如萬花筒ROM-設定-系統-實驗室中"使用Vulkan進行HWUI渲染"），請關閉該選項後，強行停止米窗再運行，否則將閃退！請注意，切換Vulkan選項可能會導致設備無法啟動</b></font></string>
     <string name="button_step_b">二、了解米窗嘅控制方式</string>
 
     <!--activity_guide_study-->

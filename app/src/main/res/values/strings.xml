@@ -38,6 +38,9 @@
     <string name="accessibility_desc">Mi-Freeform keep alive service. This service can ensure the background survival of Mi-Freeform. Mi-Freeform does not collect any information through this service.</string>
     <string name="request_overlay_permission_fail">Unable to jump to the settings interface, please manually go to the settings to enable the "display on top of other application interfaces" permission of the Mi-Freeform</string>
     <string name="request_overlay_permission">Please select the Mi-Freeform to enable the permission of "display in the upper layer of other application interface"</string>
+    <string name="request_accessibility_permission">Please enable Accessibility Service for Mi-Freeform to work.</string>
+    <string name="request_accessibility_permission_fail">Failed to open Accessibility settings. Please enable it manually.</string>
+    <string name="create_freeform_fail">Failed to create freeform window. Please try again.</string>
     <string name="reset_success">Reset Successful,Some settings take effect after restarting Mi-Freeform</string>
     <string name="label_floating_apps">Sidebar shortcut app selection</string>
     <string name="label_notification_apps">Take over notification app selection</string>
