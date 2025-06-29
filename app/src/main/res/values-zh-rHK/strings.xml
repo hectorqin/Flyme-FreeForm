@@ -1,0 +1,230 @@
+<resources>
+    <string name="app_name">Flyme-小窗</string>
+    <string name="warn">提示</string>
+    <string name="done">確定</string>
+    <string name="join_group">加入TG群吹水</string>
+    <string name="cancel">取消</string>
+
+    <string name="lorem_ipsum">"a"</string>
+    <string name="xposed_description">一個可以讓應用程式以小窗模式運行嘅Xposed模組</string>
+
+    <!--SplashActivity-->
+    <string name="mi_freeform_not_support">米窗僅支援Android 10及以上系統</string>
+    <string name="privacy_title">隱私政策</string>
+    <string name="privacy_message">開發者名稱：KindBrave\n\n版本生效日期：2022/8/31\n\n隱私政策版本：1\n\n歡迎你使用米窗，米窗非常重視用戶嘅隱私，米窗本體唔會收集、存儲、上傳任何用戶信息；但係米窗使用咗Bugly，Bugly使用過程中可能會收集用戶信息，Bugly隱私政策請見下文中關於Bugly嘅描述。\n\n請仔細閱讀並理解以下內容，如果你唔同意米窗嘅隱私政策或者對米窗嘅隱私政策有疑問，請唔好使用米窗。\n\n1.米窗本體\n為咗保證米窗嘅正常運行，米窗需要申請以下可能涉及隱私嘅權限：\n\t1)無障礙權限\n\t\t無障礙權限用於側邊欄嘅展示等功能，主要利用其高保活能力特性，米窗冇使用無障礙權限對系統、用戶進行任何監控。\n\t2)通知使用權限\n\t\t通知使用權係可選權限，即你可以根據自己嘅情況選擇授權或者唔授權。通知使用權用戶接管通知以對通知添加"小窗打開"功能，米窗雖然獲取到通知內容，但係冇對其進行任何分析、存儲、上傳。\n\n2.Bugly\nBugly係騰訊旗下一個Bug收集嘅庫，米窗使用Bugly僅用於收集Bug。\n其中，Bugly會收集設備嘅一啲信息，包括Andorid版本號、CPU架構等；會使用互聯網權限上傳崩潰日誌。\n更詳細嘅Bugly隱私策略，請閱讀《Bugly SDK個人信息保護規則》，網址：https://privacy.qq.com/document/preview/fc748b3d96224fdb825ea79e132c1a56</string>
+    <string name="agree">同意</string>
+    <string name="reject">拒絕</string>
+
+    <!--FreeformView-->
+    <string name="service_not_running">Shizuku/Sui服務冇運行，你係咪為米窗授權咗Shizuku/Sui？</string>
+    <string name="overlay_no_permission">冇懸浮窗權限</string>
+    <string name="app_is_running">該應用已經處於小窗模式</string>
+    <string name="create_display_fail">創建屏幕失敗，呢表示米窗可能唔可以喺呢個ROM上運行，請聯繫開發者</string>
+
+    <!--fragment_home.xml-->
+    <string name="settings">設定</string>
+    <string name="feedback">問題反饋</string>
+    <string name="donate">捐贈</string>
+    <string name="rate">打個分啦</string>
+    <string name="coolapk_my_name">酷安關注我 @KindBrave</string>
+    <string name="add_qq_group">加入QQ交流1群</string>
+    <string name="add_qq_group2">加入QQ交流2群</string>
+    <string name="add_qq_channel">加入QQ頻道/反饋</string>
+    <string name="add_telegram">Telegram交流群</string>
+    <string name="open_source">Github</string>
+    <string name="accessibility_no_start_home">點擊申請無障礙權限</string>
+    <string name="donate_message">米窗無需強制付費即可體驗，但維護米窗耗費咗開發者大量精力。捐贈可以讓開發者更有動力地維護落去</string>
+    <string name="exchange">交流與反饋</string>
+    <string name="guide_help">幫助</string>
+    <string name="guide">功能引導</string>
+    <string name="question">常見問題</string>
+    <string name="open_api">開放API</string>
+
+    <!--HomeFragment-->
+    <string name="try_to_init_shizuku">正在嘗試激活Shizuku服務…</string>
+    <string name="try_to_init_xposed">擁有Xposed後並唔可以幫助米窗開啟小窗，但米窗擁有Xposed後可以阻止應用從小窗中跳出為全屏。使用Xposed，需要你去Xposed管理應用（如Lsposed）中為米窗勾選"系統框架"並重啟設備</string>
+    <string name="sui_service_description">你已經可以體驗米窗服務</string>
+    <string name="no_service_description">Xposed同Sui/Shizuku服務都冇啟動</string>
+    <string name="start_market_fail">打開應用商店失敗</string>
+    <string name="start_coolapk_fail">打開酷安失敗</string>
+    <string name="start_qq_fail">打開QQ失敗</string>
+    <string name="sui_start_short">Sui已激活</string>
+    <string name="shizuku_start_short">Shizuku已激活</string>
+    <string name="xposed_start_short">Xposed存在</string>
+    <string name="home_accessibility_warn_message">當前保活模式為無障礙服務，所以需要開啟無障礙服務先可以正常運行。如果喺你嘅設備上無障礙服務有問題或者你唔想使用無障礙模式，可以去設定中切換保活模式</string>
+    <string name="go_to_start_accessibility">開啟無障礙</string>
+    <string name="go_to_change_service_type">去切換保活服務類型</string>
+    <string name="donate_wechat_title">保存截圖喺微信掃碼就可以啦</string>
+
+    <!--accessibility_config.xml-->
+    <string name="accessibility_desc">米窗保活服務。該服務可以保證米窗嘅後台存活。米窗唔會通過該服務收集任何信息。</string>
+
+    <!--ChooseAppFloatingView-->
+    <string name="request_overlay_permission_fail">無法跳轉到設定界面，請手動前往設定開啟米窗嘅"顯示喺其他應用界面嘅上層"權限</string>
+    <string name="request_overlay_permission">請選擇米窗開啟"顯示喺其他應用界面嘅上層"權限</string>
+
+    <!--ChooseAppsFragment-->
+    <string name="label_floating_apps">側邊欄快捷應用選擇</string>
+    <string name="label_notification_apps">接管通知應用選擇</string>
+
+    <!--ChooseAppFloatingAdapter-->
+    <string name="all_apps">所有應用</string>
+    <string name="edit_apps">編輯</string>
+
+    <!--content_permission-->
+    <string name="xposed_no_start">（可選）Xposed冇激活</string>
+    <string name="xposed_start">Xposed存在，請注意勾選系統框架並重啟</string>
+    <string name="permission_info">為咗保證軟件嘅正常運行，米窗需要申請以下權限。其中，Xposed權限可以防止小窗中嘅應用跳出到全屏；Shizuku/Sui權限用於打開小窗等核心功能；無障礙權限用於保證米窗嘅存活；疊加窗口權限用於展示小窗界面；通知使用權用於打開通知應用嘅小窗。</string>
+    <string name="shizuku_no_start">點擊授權Shizuku/Sui</string>
+    <string name="sui_start">Sui服務已經運行</string>
+    <string name="shizuku_start">Shizuku服務已經運行</string>
+    <string name="accessibility_no_start">（可選）點擊申請無障礙權限</string>
+    <string name="accessibility_start">無障礙服務已經運行</string>
+    <string name="overlay_no_start">點擊申請疊加窗口權限</string>
+    <string name="overlay_start">疊加窗口已經授權</string>
+    <string name="notification_no_start">（可選）點擊通知使用權限</string>
+    <string name="notification_start">通知使用權限已經授權</string>
+
+    <!--PermissionActivity-->
+    <string name="label_permission">權限申請</string>
+    <string name="no_permission">仲有必要權限冇授權</string>
+    <string name="xposed_permission_intro">開啟Xposed功能需要前往Xposed管理器（如Lsposed）勾選系統框架並重啟。請注意，即使此處顯示已經開啟Xposed功能，仍然有注入失敗嘅可能，具體請參考Xposed中嘅帶有[Mi-Freeform]標籤嘅日誌。</string>
+
+    <!--activity_permission-->
+    <string name="next_step">下一步</string>
+
+    <!--SettingActivity-->
+    <string name="label_setting">設定</string>
+
+    <!--settings-->
+    <string name="category_base">基本設定</string>
+    <string name="switch_hide_recent">從最近任務隱藏</string>
+    <string name="switch_hide_recent_summary">喺米窗中從多任務隱藏。劃掉米窗再重新進入即可生效</string>
+    <string name="service_type_title">保活服務類型</string>
+    <string name="service_type_summary">默認為無障礙。如果無障礙喺你嘅設備上有問題，可以選擇前台通知。切換到前台通知時，請確保無障礙處於關閉狀態。如果無障礙喺你嘅設備上運行正常，請唔好選擇前台通知</string>
+    <string name="preference_reset_overlay_setting">重置疊加層位置與大小</string>
+    <string name="preference_reset_overlay_setting_summary">重置包括記錄嘅小窗位置同大小、側邊欄嘅位置。可用於以上兩者跳出屏外或尺寸異常而無法控制嘅問題</string>
+    <string name="compatible_title">兼容模式啟動小窗（實驗性）</string>
+    <string name="compatible_summary">使用兼容模式啟動小窗，該模式可以解決小窗內軟件通知、全屏後等界面尺寸異常嘅問題。兼容模式小窗界面縮放比例下一版本支持。</string>
+    <string name="preference_start_by_recent_view_title">喺多任務打開</string>
+    <string name="preference_start_by_recent_view_summary">點樣喺多任務界面打開米窗？喺Xposed管理器中勾選桌面後，長按位於多任務界面嘅應用圖標即可。該功能只支持類Launcher3桌面</string>
+
+    <string name="category_freeform">小窗設定</string>
+    <string name="setting_freeform_dpi_title">小窗內界面縮放</string>
+    <string name="remember_position_title">記住懸浮小窗位置</string>
+    <string name="remember_position_summary">記住上次懸浮時嘅位置</string>
+    <string name="use_sui_refuse_to_fullscreen_title">使用Shizuku/Sui阻止應用跳出小窗到全屏(實驗性)</string>
+    <string name="use_sui_refuse_to_fullscreen_summary">暫時只支持Android 12+。該功能建議僅喺冇Xposed或者Xposed阻止失敗時啟用。嘗試使用Shizuku/Sui阻止小窗內嘅應用從小窗跳出到全屏。該功能仍喺測試中，唔保證阻止成功，並且會導致屏幕閃爍、卡頓等問題</string>
+    <string name="manual_adjust_freeform_rotation_title">手動調整小窗方向（實驗性）</string>
+    <string name="manual_adjust_freeform_rotation_summary">開啟後，允許通過雙擊底欄中部按鈕來手動旋轉小窗方向。因為設備嘅多樣性，該功能未必達到預期，請理性看待</string>
+
+    <string name="category_floating">側邊欄</string>
+    <string name="switch_floating">全局側邊欄</string>
+    <string name="switch_floating_summary">通過側邊欄打開小窗應用</string>
+    <string name="menu_floating_position">側邊欄位置</string>
+    <string name="preference_quick_floating_app">快捷應用</string>
+    <string name="preference_quick_floating_app_summary">選擇喺側邊欄中展示嘅可以快速啟動小窗嘅應用</string>
+    <string name="floating_alpha_title">側邊欄透明度</string>
+
+    <string name="category_notify">通知</string>
+    <string name="switch_notify_freeform">接管選定應用通知</string>
+    <string name="switch_notify_freeform_summary">喺選定應用發送通知時，米窗會攔截並且發送一個相同內容嘅通知，但可以通過米窗開啟該應用</string>
+    <string name="preference_notification_apps_summary">選擇需要接管嘅應用</string>
+    <string name="preference_notification_apps">接管通知應用</string>
+
+    <!--menu_choose_apps.xml-->
+    <string name="search">搜索</string>
+    <string name="choose_all">全選</string>
+    <string name="choose_all_cancel">取消全選</string>
+
+    <!--FloatingAppsSortActivity-->
+    <string name="label_sort_apps">快捷應用排序</string>
+
+    <!--NotificationService.kt-->
+    <string name="freeform_channel_id">小窗應用通知</string>
+    <string name="open_by_freeform">小窗打開</string>
+
+    <!--SettingFragment-->
+    <string name="require_accessibility">請授權無障礙權限</string>
+    <string name="require_notification">請授權通知使用權限</string>
+    <string name="reset_success">重置成功，部分設定重啟米窗後生效</string>
+    <string name="require_start_accessibility">請開啟無障礙服務後再試</string>
+    <string name="require_stop_accessibility">請關閉無障礙服務後再試</string>
+    <string name="freeform_dpi_dialog_title">輸入縮放值</string>
+    <string name="to_default">恢復默認</string>
+
+    <!--QuickStartTileService-->
+    <string name="choose_freeform_app">選擇小窗應用</string>
+
+    <!--fragment_guide_first-->
+    <string name="hello">你好</string>
+    <string name="welcome">歡迎使用米窗</string>
+    <string name="guide_a">通過下面嘅教程，你將會更快地上手米窗</string>
+    <string name="button_step_a">一、使用米窗前嘅準備</string>
+    <string name="guide_a_text">\t\t<font color="red"><b>特別提醒：米窗無法喺Vulkan模式下運行，如果你開啟過類似選項（如萬花筒ROM-設定-系統-實驗室中"使用Vulkan進行HWUI渲染"），請關閉該選項後，強行停止米窗再運行，否則將閃退！請注意，切換Vulkan選項可能會導致設備無法啟動，請唔好在主要設備
+    <string name="button_step_b">二、了解米窗嘅控制方式</string>
+
+    <!--activity_guide_study-->
+
+    <!--GuideStudyActivity-->
+    <string name="guide_move">小窗點樣移動？點樣掛起？ 拖動指示嘅按鈕到屏幕四角試下 從掛起狀態恢復只需點擊小窗界面就得</string>
+    <string name="guide_back">好嘢！\n咁點樣喺小窗返去上一個界面？點擊指示嘅按鈕就得</string>
+    <string name="guide_close">正啊！\n想閂咗個小窗？點擊指示嘅按鈕就得</string>
+    <string name="guide_to_full">唔錯喎！\n咁點樣將小窗變全屏？長按指示按鈕試下</string>
+    <string name="guide_to_back_stage">醒目！\n唔想閂咗個小窗程式，但又唔想佢顯示喺屏幕？試下後台掛起長按右鍵就得\n</string>
+    <string name="guide_scale">犀利！\n後台掛起嘅程式會顯示喺小窗應用選擇界面最頂，點擊就可以恢復。\n最後一樣，如果想調整小窗大小，試下拖動小窗下角發光嘅部分</string>
+    <string name="guide_success">恭喜你，已經學識米窗嘅基本操作\n而家，你可以點擊關閉按鈕閂咗呢個示範小窗</string>
+
+    <!--SecondFragment-->
+    <string name="no_step_done">請完成所有引導</string>
+    <string name="step_b_warn">請確保你已經睇晒同明白晒"一、使用米窗前嘅準備"嘅內容，先好開始呢個教程</string>
+    <string name="to_read_step_a">去睇下</string>
+    <string name="start_step_b">開始教程</string>
+
+    <!--fragment_second-->
+    <string name="have_done">完成</string>
+
+    <!--DonationActivity-->
+    <string name="donation_label">捐贈</string>
+    <string name="open_alipay_fail">開支付寶失敗</string>
+
+    <!--activity_donation.xml-->
+    <string name="senior_info">米窗一直堅持免費使用嘅承諾，但係為咗開發更多好玩實用嘅功能，需要你嘅支持。如果你有興趣幫米窗，可以喺酷安俾五星好評，或者捐贈開發者。支付寶捐贈可以點擊下面個按鈕跳轉，微信捐贈暫時唔支援跳轉，你可以截圖保存之後掃碼捐贈，多謝晒。無論你捐唔捐，米窗提供嘅功能都會保持一樣，多謝你嘅支持。</string>
+    <string name="alipay">支付寶捐贈</string>
+    <string name="pay_list">捐贈名單</string>
+    <string name="so_sad">捐咩捐啊，我要白嫖！</string>
+    <string name="wechat">下面微信讚賞碼截圖就得啦</string>
+
+    <!--ChooseAppFloatingAdapter-->
+    <string name="fenshen">分身</string>
+    <string name="running">(正在運行)</string>
+
+    <!--FloatingActivity-->
+    <string name="floating_label">打開側邊欄</string>
+    <string name="require_foreground">請確保前台服務運行緊，可以試下切換保活服務類型嚟解決</string>
+
+    <!--ForegroundService-->
+    <string name="foreground_notification_name">前台服務通知</string>
+    <string name="foreground_notification_title">米窗正喺後台運行</string>
+    <string name="foreground_notification_text">點擊可以打開側邊欄</string>
+
+    <!--bottom_nav_menu-->
+    <string name="home">首頁</string>
+
+    <!--view_edit-->
+    <string name="input_freeform_dpi">範圍50~500</string>
+
+    <!--RecentActivity-->
+    <string name="recent_label">正在運行嘅小窗</string>
+
+    <string name="test">1111</string>
+
+    <!--task_view_menu_option-->
+    <string name="recent_open_by_freeform">用米窗打開</string>
+
+    <string name="setting_freeform_size">小窗大小</string>
+    <string name="setting_freeform_size_landspace">橫屏狀態下嘅小窗大小</string>
+    <string name="setting_freeform_float_size">掛起狀態下嘅小窗大小</string>
+    <string name="setting_freeform_dimming">小窗打開時嘅背景陰影大小</string>
+    <string name="apps">應用</string>
+</resources>
