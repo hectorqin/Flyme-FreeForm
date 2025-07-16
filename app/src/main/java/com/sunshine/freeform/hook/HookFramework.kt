@@ -211,7 +211,7 @@ class HookFramework : IXposedHookLoadPackage, IXposedHookZygoteInit {
             val classLoader = p0.classLoader
 
             when (Build.VERSION.SDK_INT) {
-                Build.VERSION_CODES.S, Build.VERSION_CODES.S_V2, Build.VERSION_CODES.TIRAMISU, Build.VERSION_CODES.UPSIDE_DOWN_CAKE, Build.VERSION_CODES.VANILLA_ICE_CREAM -> {
+                Build.VERSION_CODES.S, Build.VERSION_CODES.S_V2, Build.VERSION_CODES.TIRAMISU, Build.VERSION_CODES.UPSIDE_DOWN_CAKE, Build.VERSION_CODES.VANILLA_ICE_CREAM, Build.VERSION_CODES.BAKLAVA -> {
                     XLog.d("hook on Android 12 and so on")
                     hookATS(classLoader)
                 }
