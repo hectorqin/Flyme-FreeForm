@@ -68,7 +68,7 @@ class HookLauncher : IXposedHookLoadPackage {
                     4 -> c.newInstance(action, activity, itemInfo, null)
                     3 -> c.newInstance(action, activity, itemInfo)
                     else -> {
-                        XposedBridge.log("Mi-Freeform: unknown RemoteActionShortcut constructor: ${c.toGenericString()}")
+                        XposedBridge.log("Flyme-Freeform: unknown RemoteActionShortcut constructor: ${c.toGenericString()}")
                         null
                     }
                 }

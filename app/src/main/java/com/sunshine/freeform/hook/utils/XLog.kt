@@ -5,6 +5,6 @@ import de.robv.android.xposed.XposedBridge
 object XLog {
 
     fun d(s: Any) {
-        XposedBridge.log("[Mi-Freeform/D] $s")
+        XposedBridge.log("[Flyme-Freeform/D] $s")
     }
 }
