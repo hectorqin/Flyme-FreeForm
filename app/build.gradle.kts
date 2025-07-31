@@ -1,12 +1,12 @@
 import com.github.megatronking.stringfog.plugin.StringFogExtension
 
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("com.google.devtools.ksp")
-    id("kotlin-parcelize")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.parcelize)
+    alias(libs.plugins.refine)
     id("stringfog")
-    id("dev.rikka.tools.refine")
 }
 
 android {
@@ -52,48 +52,47 @@ configurations.all {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.16.0")
-    implementation("androidx.appcompat:appcompat:1.7.1")
-    implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.2.1")
-    implementation("androidx.navigation:navigation-fragment-ktx:2.9.1")
-    implementation("androidx.navigation:navigation-ui-ktx:2.9.1")
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.1")
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.navigation.fragment)
+    implementation(libs.androidx.navigation.ui)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit.ext)
+    androidTestImplementation(libs.espresso.core)
+    implementation(libs.androidx.lifecycle.viewmodel)
 
-    compileOnly("de.robv.android.xposed:api:82")
+    compileOnly(libs.xposed.api)
 
-    implementation("dev.rikka.rikkax.appcompat:appcompat:1.5.0.1")
-    implementation("dev.rikka.rikkax.widget:borderview:1.1.0")
-    implementation("dev.rikka.rikkax.recyclerview:recyclerview-ktx:1.3.1")
+    implementation(libs.rikkax.appcompat)
+    implementation(libs.rikkax.borderview)
+    implementation(libs.rikkax.recyclerview)
 
-    val shizukuVersion = "13.1.5"
-    implementation("dev.rikka.shizuku:api:$shizukuVersion")
-    implementation("dev.rikka.shizuku:provider:$shizukuVersion")
+    implementation(libs.shizuku.api)
+    implementation(libs.shizuku.provider)
 
-    implementation("androidx.room:room-runtime:2.7.2")
-    implementation("androidx.room:room-ktx:2.7.2")
-    ksp("androidx.room:room-compiler:2.7.2")
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 
-    implementation("dev.rikka.rikkax.preference:simplemenu-preference:1.0.3")
+    implementation(libs.rikkax.preference.simplemenu)
 
-    implementation("com.airbnb.android:lottie:6.6.6")
+    implementation(libs.lottie)
 
-    implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation(libs.glide)
 
-    implementation("org.lsposed.hiddenapibypass:hiddenapibypass:6.1")
+    implementation(libs.hiddenapibypass)
 
-    implementation("com.github.megatronking.stringfog:xor:5.0.0")
+    implementation(libs.stringfog.xor)
 
-    implementation("dev.rikka.tools.refine:runtime:4.4.0")
+    implementation(libs.refine.runtime)
 
-    implementation("com.github.kyuubiran:EzXHelper:1.0.3")
+    implementation(libs.ezxhelper)
 
-    implementation("com.github.halifox:androidx.preference.material3:1.2.1-alpha07")
+    implementation(libs.preference.material3)
 
-    implementation("com.github.promeg:tinypinyin:2.0.3")
+    implementation(libs.tinypinyin)
 
     compileOnly(project(":hidden-api"))
 }
