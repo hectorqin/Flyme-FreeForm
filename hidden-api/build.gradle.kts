@@ -1,5 +1,5 @@
 plugins {
-    id("com.android.library")
+    alias(libs.plugins.android.library)
 }
 
 android {
@@ -26,7 +26,7 @@ android {
 }
 
 dependencies {
-    annotationProcessor("dev.rikka.tools.refine:annotation-processor:4.4.0")
-    compileOnly("androidx.annotation:annotation:1.9.1")
-    compileOnly("dev.rikka.tools.refine:annotation:4.4.0")
+    annotationProcessor(libs.refine.annotation.processor)
+    compileOnly(libs.androidx.annotation)
+    compileOnly(libs.refine.annotation)
 }
