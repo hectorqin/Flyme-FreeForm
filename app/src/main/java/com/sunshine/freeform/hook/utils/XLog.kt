@@ -7,4 +7,7 @@ object XLog {
     fun d(s: Any) {
         XposedBridge.log("[Flyme-Freeform/D] $s")
     }
+    fun e(s: Any) {
+        XposedBridge.log("[Flyme-Freeform/E] $s")
+    }
 }
