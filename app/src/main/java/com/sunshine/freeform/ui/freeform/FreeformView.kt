@@ -242,9 +242,8 @@ class FreeformView(
     private val sharedPreferencesChangeListener =
         OnSharedPreferenceChangeListener { sharedPreferences, key ->
             if (key.equals("freeform_float_view_size")) {
-                config.floatViewSize = (sharedPreferences.getInt(key, 20)) / 100.toFloat()
-                hangUpViewHeight = (realScreenHeight * config.floatViewSize).roundToInt()
-                hangUpViewWidth = (hangUpViewHeight * config.widthHeightRatio).roundToInt()
+                config.floatViewSize = (sharedPreferences.getInt(key, 25)) / 100.toFloat()
+                initFloatViewSize()
                 if (isFloating) {
                     if (isHidden) {
                         hiddenViewToFloatView(false)
@@ -285,6 +284,7 @@ class FreeformView(
                             moveViewAnim(windowCoordinate, lastFloatViewLocation)
                         )
                         duration = 200
+                        interpolator = DecelerateInterpolator()
                         start()
                     }
                 }
@@ -320,8 +320,6 @@ class FreeformView(
     }
 
     fun initConfig() {
-        initFloatViewSize()
-
         config.freeformDpi = FreeformHelper.getScreenDpi(context)
         val tmpDpi = viewModel.getIntSp("freeform_scale", 50)
         if (tmpDpi > 50) {
@@ -329,6 +327,14 @@ class FreeformView(
         }
 
         //优化 QQ和微信也支持缩放了 q220917.1
+        //挂起大小设置
+        config.floatViewSize = (viewModel.getIntSp("freeform_float_view_size", 25)) / 75.toFloat()
+        config.freeformSize = (viewModel.getIntSp("freeform_size", 75)) / 100.toFloat()
+        config.freeformSizeLand = (viewModel.getIntSp("freeform_size_land", 90)) / 100.toFloat()
+        config.dimAmount = (viewModel.getIntSp("freeform_dimming_amount", 20)) / 100.toFloat()
+
+        initFloatViewSize()
+
         freeformScreenHeight = (min(realScreenHeight, realScreenWidth) / config.widthHeightRatio).roundToInt()
         freeformScreenWidth = (freeformScreenHeight * config.widthHeightRatio).roundToInt()
 
@@ -345,10 +351,6 @@ class FreeformView(
                 viewModel.getIntSp(REMEMBER_LAND_Y, -1)
             }
         }
-        config.floatViewSize = (viewModel.getIntSp("freeform_float_view_size", 20)) / 100.toFloat()
-        config.freeformSize = (viewModel.getIntSp("freeform_size", 75)) / 100.toFloat()
-        config.freeformSizeLand = (viewModel.getIntSp("freeform_size_land", 90)) / 100.toFloat()
-        config.dimAmount = (viewModel.getIntSp("freeform_dimming_amount", 20)) / 100.toFloat()
 
         viewModel.registerOnSharedPreferenceChangeListener(sharedPreferencesChangeListener)
 
@@ -1037,6 +1039,9 @@ class FreeformView(
 
     private fun moveViewAnim(startCoordinate: IntArray, endCoordinate: IntArray): Animator {
         val moveAnim = AnimatorSet()
+        
+        var offsetY = 0f
+        
         if (endCoordinate[0] != -1) {
             moveAnim.play(
                 ValueAnimator.ofInt(startCoordinate[0], endCoordinate[0])
@@ -1046,6 +1051,7 @@ class FreeformView(
                                 binding.root,
                                 windowLayoutParams.apply {
                                     x = it.animatedValue as Int
+                                    y = (startCoordinate[1] + offsetY).toInt()
                                 })
                         }
                     },
@@ -1059,12 +1065,22 @@ class FreeformView(
                             windowManager.updateViewLayout(
                                 binding.root,
                                 windowLayoutParams.apply {
-                                    y = it.animatedValue as Int
+                                    y = (it.animatedValue as Int) + offsetY.toInt()
                                 })
                         }
                     },
             )
         }
+        
+        val sinkAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+            addUpdateListener {
+                val fraction = it.animatedValue as Float
+                offsetY = Math.sin(fraction * Math.PI).toFloat() * 20f
+            }
+        }
+        
+        moveAnim.play(sinkAnimator)
+        
         return moveAnim
     }
 
@@ -1167,8 +1183,8 @@ class FreeformView(
                                         },
                                 )
                                 startDelay = 125
-                                duration = 550
-                                interpolator = OvershootInterpolator(1.5f)
+                                duration = 400
+                                interpolator = OvershootInterpolator(0.5f)
                                 addListener(
                                     onStart = {
                                         backgroundView.visibility = View.GONE
@@ -1261,8 +1277,8 @@ class FreeformView(
                             }
                         }
                     )
-                    duration = 300
-                    interpolator = OvershootInterpolator(1.5f)
+                    duration = 250
+                    interpolator = DecelerateInterpolator()
                     start()
                 }
             }
@@ -1292,8 +1308,8 @@ class FreeformView(
                     }
                 }
             )
-            duration = 600
-            interpolator = OvershootInterpolator(2f)
+            duration = 350
+            interpolator = DecelerateInterpolator()
             start()
         }
     }
@@ -1354,8 +1370,8 @@ class FreeformView(
                     )
                 )
             )
-            duration = 600
-            interpolator = OvershootInterpolator(2f)
+            duration = 350
+            interpolator = DecelerateInterpolator()
             start()
         }
     }
@@ -1480,8 +1496,8 @@ class FreeformView(
                                     isMoved = false
                                 }
                             )
-                            duration = 400
-                            interpolator = OvershootInterpolator(2f)
+                            duration = 300
+                            interpolator = OvershootInterpolator(0.4f)
                             start()
                         }
                     } else {
@@ -1534,7 +1550,7 @@ class FreeformView(
                         }
                     }
                 )
-                duration = 300
+                duration = 250
                 interpolator = DecelerateInterpolator()
             }
 
@@ -1558,9 +1574,9 @@ class FreeformView(
                         cardWidthMargin.roundToInt()
                     )
                 )
-                duration = 550
-                interpolator = OvershootInterpolator(1.5f)
-                startDelay = 125
+                duration = 300
+                interpolator = DecelerateInterpolator()
+                startDelay = 100
             }
 
             val rootAnimator = AnimatorSet().apply {
@@ -1580,6 +1596,7 @@ class FreeformView(
                     },
                     onEnd = {
                         isAnimating = false
+                        refreshScale()
                         if (pendingOrientationChange) {
                             pendingOrientationChange = false
                             onFreeFormRotationChanged()
@@ -1606,7 +1623,7 @@ class FreeformView(
                     onStart = {
                         isAnimating = true
                         AnimatorSet().apply {
-                            startDelay = 95
+                            startDelay = 80
                             addListener(
                                 onEnd = {
                                     windowManager.updateViewLayout(binding.root, windowLayoutParams.apply {
@@ -1656,22 +1673,23 @@ class FreeformView(
                                     cardWidthMargin.roundToInt(),
                                 ),
                             )
-                            duration = 550
-                            startDelay = 125
-                            interpolator = OvershootInterpolator(1.5f)
+                            duration = 300
+                            startDelay = 100
+                            interpolator = DecelerateInterpolator()
                             start()
                         }
                     },
                     onEnd = {
                         backgroundView.visibility = View.VISIBLE
                         isAnimating = false
+                        refreshScale()
                         if (pendingOrientationChange) {
                             pendingOrientationChange = false
                             onFreeFormRotationChanged()
                         }
                     }
                 )
-                duration = 300
+                duration = 250
                 interpolator = DecelerateInterpolator()
                 start()
             }
@@ -1722,8 +1740,8 @@ class FreeformView(
                     }
                 }
             )
-            duration = 400
-            interpolator = OvershootInterpolator(2f)
+            duration = 300
+            interpolator = OvershootInterpolator(0.4f)
             start()
         }
     }
