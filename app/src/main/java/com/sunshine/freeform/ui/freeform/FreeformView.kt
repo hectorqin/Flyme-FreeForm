@@ -1423,7 +1423,7 @@ class FreeformView(
                             windowLayoutParams.y,
                         )
 
-                        if (windowCoordinate[1] >= (realScreenHeight - screenPaddingY) / 2) {
+                        if (nowY <= (realScreenHeight * 0.1f)) {
                             destroy()
                             isMoved = false
                             return true
