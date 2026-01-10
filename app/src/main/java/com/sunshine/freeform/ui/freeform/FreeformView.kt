@@ -231,7 +231,7 @@ class FreeformView(
     })
 
     private val backgroundGestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
-        override fun onSingleTapUp(e: MotionEvent): Boolean {
+        override fun onDoubleTap(e: MotionEvent): Boolean {
             if (!isFloating) {
                 destroy()
             }
